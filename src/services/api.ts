@@ -1,15 +1,26 @@
 import { BackgammonGame, BackgammonPlayer } from '@nodots-llc/backgammon-types'
 import axios, { AxiosInstance } from 'axios'
 import { ApiResponse, CliConfig } from '../types'
+import { AuthService } from './auth'
 
 export class ApiService {
   private client: AxiosInstance
   private config: CliConfig
+  private authService: AuthService
 
-  constructor(config: CliConfig) {
-    this.config = config
+  constructor(config?: Partial<CliConfig>) {
+    this.authService = new AuthService()
+    const authConfig = this.authService.getApiConfig()
+
+    this.config = {
+      apiUrl:
+        config?.apiUrl || process.env.NODOTS_API_URL || 'http://localhost:3000',
+      userId: config?.userId || authConfig.userId,
+      apiKey: config?.apiKey || authConfig.apiKey,
+    }
+
     this.client = axios.create({
-      baseURL: config.apiUrl,
+      baseURL: this.config.apiUrl,
       timeout: 10000,
       headers: {
         'Content-Type': 'application/json',
@@ -77,6 +88,22 @@ export class ApiService {
   async getUsers(): Promise<ApiResponse<BackgammonPlayer[]>> {
     try {
       const response = await this.client.get('/api/v1/users')
+      return { success: true, data: response.data }
+    } catch (error) {
+      return this.handleError(error)
+    }
+  }
+
+  async createOrUpdateUser(userData: {
+    source: string
+    externalId: string
+    email: string
+    given_name: string
+    family_name: string
+    locale: string
+  }): Promise<ApiResponse<any>> {
+    try {
+      const response = await this.client.post('/api/v1/users', userData)
       return { success: true, data: response.data }
     } catch (error) {
       return this.handleError(error)
