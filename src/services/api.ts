@@ -7,6 +7,7 @@ export class ApiService {
   private client: AxiosInstance
   private config: CliConfig
   private authService: AuthService
+  private apiVersion: string
 
   constructor(config?: Partial<CliConfig>) {
     this.authService = new AuthService()
@@ -19,9 +20,12 @@ export class ApiService {
       apiKey: config?.apiKey || authConfig.apiKey,
     }
 
+    this.apiVersion = process.env.NODOTS_API_VERSION || 'v1'
+
     this.client = axios.create({
       baseURL: this.config.apiUrl,
       timeout: 10000,
+      ...this.getSSLConfig(),
       headers: {
         'Content-Type': 'application/json',
       },
@@ -36,12 +40,31 @@ export class ApiService {
     })
   }
 
+  private getSSLConfig() {
+    // Handle HTTPS with self-signed certificates in development
+    if (this.config.apiUrl.startsWith('https://')) {
+      try {
+        const https = require('https')
+        return {
+          httpsAgent: new https.Agent({
+            rejectUnauthorized: process.env.NODE_ENV === 'production'
+          })
+        }
+      } catch (error) {
+        // If https module is not available, continue without SSL configuration
+        console.warn('Warning: HTTPS module not available, SSL configuration skipped')
+        return {}
+      }
+    }
+    return {}
+  }
+
   async createGame(
     player1Id: string,
     player2Id: string
   ): Promise<ApiResponse<BackgammonGame>> {
     try {
-      const response = await this.client.post('/api/v1/games', {
+      const response = await this.client.post(`/api/${this.apiVersion}/games`, {
         player1: { userId: player1Id },
         player2: { userId: player2Id },
       })
@@ -53,7 +76,7 @@ export class ApiService {
 
   async getGame(gameId: string): Promise<ApiResponse<BackgammonGame>> {
     try {
-      const response = await this.client.get(`/api/v1/games/${gameId}`)
+      const response = await this.client.get(`/api/${this.apiVersion}/games/${gameId}`)
       return { success: true, data: response.data }
     } catch (error) {
       return this.handleError(error)
@@ -62,7 +85,7 @@ export class ApiService {
 
   async rollDice(gameId: string): Promise<ApiResponse<BackgammonGame>> {
     try {
-      const response = await this.client.post(`/api/v1/games/${gameId}/roll`)
+      const response = await this.client.post(`/api/${this.apiVersion}/games/${gameId}/roll`)
       return { success: true, data: response.data }
     } catch (error) {
       return this.handleError(error)
@@ -75,7 +98,7 @@ export class ApiService {
     to: number
   ): Promise<ApiResponse<BackgammonGame>> {
     try {
-      const response = await this.client.post(`/api/v1/games/${gameId}/move`, {
+      const response = await this.client.post(`/api/${this.apiVersion}/games/${gameId}/move`, {
         from,
         to,
       })
@@ -87,7 +110,7 @@ export class ApiService {
 
   async getUsers(): Promise<ApiResponse<BackgammonPlayer[]>> {
     try {
-      const response = await this.client.get('/api/v1/users')
+      const response = await this.client.get(`/api/${this.apiVersion}/users`)
       return { success: true, data: response.data }
     } catch (error) {
       return this.handleError(error)
@@ -103,7 +126,7 @@ export class ApiService {
     locale: string
   }): Promise<ApiResponse<any>> {
     try {
-      const response = await this.client.post('/api/v1/users', userData)
+      const response = await this.client.post(`/api/${this.apiVersion}/users`, userData)
       return { success: true, data: response.data }
     } catch (error) {
       return this.handleError(error)
@@ -113,7 +136,7 @@ export class ApiService {
   // Robot Simulation Methods
   async getRobots(): Promise<ApiResponse<any[]>> {
     try {
-      const response = await this.client.get('/api/v1/robots')
+      const response = await this.client.get(`/api/${this.apiVersion}/robots`)
       return { success: true, data: response.data }
     } catch (error) {
       return this.handleError(error)
@@ -126,7 +149,7 @@ export class ApiService {
     robot2Difficulty?: string
   }): Promise<ApiResponse<any>> {
     try {
-      const response = await this.client.post('/api/v1/robots/simulations', {
+      const response = await this.client.post(`/api/${this.apiVersion}/robots/simulations`, {
         speed: 1000,
         robot1Difficulty: 'beginner',
         robot2Difficulty: 'beginner',
@@ -141,7 +164,7 @@ export class ApiService {
   async getSimulationStatus(simulationId: string): Promise<ApiResponse<any>> {
     try {
       const response = await this.client.get(
-        `/api/v1/robots/simulations/${simulationId}`
+        `/api/${this.apiVersion}/robots/simulations/${simulationId}`
       )
       return { success: true, data: response.data }
     } catch (error) {
@@ -152,7 +175,7 @@ export class ApiService {
   async pauseSimulation(simulationId: string): Promise<ApiResponse<any>> {
     try {
       const response = await this.client.post(
-        `/api/v1/robots/simulations/${simulationId}/pause`
+        `/api/${this.apiVersion}/robots/simulations/${simulationId}/pause`
       )
       return { success: true, data: response.data }
     } catch (error) {
@@ -163,7 +186,7 @@ export class ApiService {
   async stopSimulation(simulationId: string): Promise<ApiResponse<any>> {
     try {
       const response = await this.client.delete(
-        `/api/v1/robots/simulations/${simulationId}`
+        `/api/${this.apiVersion}/robots/simulations/${simulationId}`
       )
       return { success: true, data: response.data }
     } catch (error) {
@@ -177,7 +200,7 @@ export class ApiService {
   ): Promise<ApiResponse<any>> {
     try {
       const response = await this.client.post(
-        `/api/v1/robots/simulations/${simulationId}/speed`,
+        `/api/${this.apiVersion}/robots/simulations/${simulationId}/speed`,
         {
           speed,
         }
@@ -188,11 +211,23 @@ export class ApiService {
     }
   }
 
+  // Human vs Robot game creation
+  async createHumanVsRobotGame(): Promise<ApiResponse<BackgammonGame>> {
+    try {
+      const response = await this.client.post(`/api/${this.apiVersion}/games`, {
+        opponent: 'robot'
+      })
+      return { success: true, data: response.data }
+    } catch (error) {
+      return this.handleError(error)
+    }
+  }
+
   private handleError(error: any): ApiResponse<any> {
     if (axios.isAxiosError(error)) {
       return {
         success: false,
-        error: error.response?.data?.message || error.message,
+        error: error.response?.data?.message || error.response?.data?.error || error.message,
       }
     }
     return {
