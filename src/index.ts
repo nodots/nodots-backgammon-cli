@@ -28,6 +28,11 @@ import { RobotSpeedCommand } from './commands/robot-speed'
 import { RobotStatusCommand } from './commands/robot-status'
 import { RobotStopCommand } from './commands/robot-stop'
 
+// Human vs Robot game commands
+import { HumanVsRobotCommand } from './commands/human-vs-robot'
+import { GameStatusCommand } from './commands/game-status'
+import { GameRollCommand } from './commands/game-roll'
+
 async function checkAuthenticationAndPrompt(): Promise<void> {
   const authService = new AuthService()
 
@@ -98,6 +103,11 @@ program.addCommand(new LogoutCommand())
 // program.addCommand(new MoveCommand())
 // program.addCommand(new RollCommand())
 // program.addCommand(new PlayCommand())
+
+// Add human vs robot game commands
+program.addCommand(new HumanVsRobotCommand())
+program.addCommand(new GameStatusCommand())
+program.addCommand(new GameRollCommand())
 
 // Add robot simulation commands
 program.addCommand(new RobotListCommand())
