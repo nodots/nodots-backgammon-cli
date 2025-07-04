@@ -138,7 +138,7 @@ describe('Robot Simulation Commands', () => {
 
       expect(options).toContain('-c, --concurrent <number>')
       expect(options).toContain('-s, --speed <milliseconds>')
-      expect(options).toContain('-p, --preset <n>')
+      expect(options).toContain('-p, --preset <name>')
       expect(options).toContain('-f, --file <path>')
       expect(options).toContain('-o, --output <path>')
       expect(options).toContain('-i, --interactive')
