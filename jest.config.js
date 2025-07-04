@@ -11,12 +11,6 @@ module.exports = {
       },
     ],
   },
-  moduleNameMapper: {
-    '^chalk$': '<rootDir>/node_modules/chalk/source/index.js',
-  },
-  transformIgnorePatterns: [
-    'node_modules/(?!(chalk|commander|inquirer|ora|axios)/)',
-  ],
   collectCoverageFrom: [
     'src/**/*.ts',
     '!src/**/*.d.ts',
