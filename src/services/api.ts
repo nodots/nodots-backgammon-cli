@@ -1,5 +1,6 @@
 import { BackgammonGame, BackgammonPlayer } from '@nodots-llc/backgammon-types'
 import axios, { AxiosInstance } from 'axios'
+import https from 'https'
 import { ApiResponse, CliConfig } from '../types'
 import { AuthService } from './auth'
 
@@ -7,10 +8,12 @@ export class ApiService {
   private client: AxiosInstance
   private config: CliConfig
   private authService: AuthService
+  private apiVersion: string
 
   constructor(config?: Partial<CliConfig>) {
     this.authService = new AuthService()
     const authConfig = this.authService.getApiConfig()
+    this.apiVersion = process.env.NODOTS_API_VERSION || 'v1'
 
     this.config = {
       apiUrl:
@@ -19,12 +22,18 @@ export class ApiService {
       apiKey: config?.apiKey || authConfig.apiKey,
     }
 
+    // Create HTTPS agent that accepts self-signed certificates in development
+    const httpsAgent = new https.Agent({
+      rejectUnauthorized: process.env.NODE_ENV === 'production',
+    })
+
     this.client = axios.create({
       baseURL: this.config.apiUrl,
       timeout: 10000,
       headers: {
         'Content-Type': 'application/json',
       },
+      httpsAgent,
     })
 
     // Add request interceptor for authentication
@@ -41,7 +50,7 @@ export class ApiService {
     player2Id: string
   ): Promise<ApiResponse<BackgammonGame>> {
     try {
-      const response = await this.client.post('/api/v1/games', {
+      const response = await this.client.post(`/api/${this.apiVersion}/games`, {
         player1: { userId: player1Id },
         player2: { userId: player2Id },
       })
@@ -53,7 +62,9 @@ export class ApiService {
 
   async getGame(gameId: string): Promise<ApiResponse<BackgammonGame>> {
     try {
-      const response = await this.client.get(`/api/v1/games/${gameId}`)
+      const response = await this.client.get(
+        `/api/${this.apiVersion}/games/${gameId}`
+      )
       return { success: true, data: response.data }
     } catch (error) {
       return this.handleError(error)
@@ -62,7 +73,9 @@ export class ApiService {
 
   async rollDice(gameId: string): Promise<ApiResponse<BackgammonGame>> {
     try {
-      const response = await this.client.post(`/api/v1/games/${gameId}/roll`)
+      const response = await this.client.post(
+        `/api/${this.apiVersion}/games/${gameId}/roll`
+      )
       return { success: true, data: response.data }
     } catch (error) {
       return this.handleError(error)
@@ -75,10 +88,13 @@ export class ApiService {
     to: number
   ): Promise<ApiResponse<BackgammonGame>> {
     try {
-      const response = await this.client.post(`/api/v1/games/${gameId}/move`, {
-        from,
-        to,
-      })
+      const response = await this.client.post(
+        `/api/${this.apiVersion}/games/${gameId}/move`,
+        {
+          from,
+          to,
+        }
+      )
       return { success: true, data: response.data }
     } catch (error) {
       return this.handleError(error)
@@ -87,7 +103,7 @@ export class ApiService {
 
   async getUsers(): Promise<ApiResponse<BackgammonPlayer[]>> {
     try {
-      const response = await this.client.get('/api/v1/users')
+      const response = await this.client.get(`/api/${this.apiVersion}/users`)
       return { success: true, data: response.data }
     } catch (error) {
       return this.handleError(error)
@@ -103,7 +119,10 @@ export class ApiService {
     locale: string
   }): Promise<ApiResponse<any>> {
     try {
-      const response = await this.client.post('/api/v1/users', userData)
+      const response = await this.client.post(
+        `/api/${this.apiVersion}/users`,
+        userData
+      )
       return { success: true, data: response.data }
     } catch (error) {
       return this.handleError(error)
@@ -113,7 +132,7 @@ export class ApiService {
   // Robot Simulation Methods
   async getRobots(): Promise<ApiResponse<any[]>> {
     try {
-      const response = await this.client.get('/api/v1/robots')
+      const response = await this.client.get(`/api/${this.apiVersion}/robots`)
       return { success: true, data: response.data }
     } catch (error) {
       return this.handleError(error)
@@ -126,12 +145,15 @@ export class ApiService {
     robot2Difficulty?: string
   }): Promise<ApiResponse<any>> {
     try {
-      const response = await this.client.post('/api/v1/robots/simulations', {
-        speed: 1000,
-        robot1Difficulty: 'beginner',
-        robot2Difficulty: 'beginner',
-        ...config,
-      })
+      const response = await this.client.post(
+        `/api/${this.apiVersion}/robots/simulations`,
+        {
+          speed: 1000,
+          robot1Difficulty: 'beginner',
+          robot2Difficulty: 'beginner',
+          ...config,
+        }
+      )
       return { success: true, data: response.data }
     } catch (error) {
       return this.handleError(error)
@@ -141,7 +163,7 @@ export class ApiService {
   async getSimulationStatus(simulationId: string): Promise<ApiResponse<any>> {
     try {
       const response = await this.client.get(
-        `/api/v1/robots/simulations/${simulationId}`
+        `/api/${this.apiVersion}/robots/simulations/${simulationId}`
       )
       return { success: true, data: response.data }
     } catch (error) {
@@ -152,7 +174,7 @@ export class ApiService {
   async pauseSimulation(simulationId: string): Promise<ApiResponse<any>> {
     try {
       const response = await this.client.post(
-        `/api/v1/robots/simulations/${simulationId}/pause`
+        `/api/${this.apiVersion}/robots/simulations/${simulationId}/pause`
       )
       return { success: true, data: response.data }
     } catch (error) {
@@ -163,7 +185,7 @@ export class ApiService {
   async stopSimulation(simulationId: string): Promise<ApiResponse<any>> {
     try {
       const response = await this.client.delete(
-        `/api/v1/robots/simulations/${simulationId}`
+        `/api/${this.apiVersion}/robots/simulations/${simulationId}`
       )
       return { success: true, data: response.data }
     } catch (error) {
@@ -177,7 +199,7 @@ export class ApiService {
   ): Promise<ApiResponse<any>> {
     try {
       const response = await this.client.post(
-        `/api/v1/robots/simulations/${simulationId}/speed`,
+        `/api/${this.apiVersion}/robots/simulations/${simulationId}/speed`,
         {
           speed,
         }

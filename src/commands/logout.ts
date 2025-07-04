@@ -14,20 +14,20 @@ export class LogoutCommand extends Command {
       const authService = new AuthService()
 
       if (!authService.isLoggedIn()) {
-        console.log(chalk.yellow('You are not currently logged in.'))
+        console.log(chalk.yellowBright('You are not currently logged in.'))
         return
       }
 
       const currentUser = authService.getCurrentUser()
       authService.logout()
 
-      console.log(chalk.green('✅ Successfully logged out'))
+      console.log(chalk.greenBright('✅ Successfully logged out'))
       if (currentUser?.email) {
-        console.log(chalk.gray(`Goodbye, ${currentUser.email}!`))
+        console.log(chalk.whiteBright(`Goodbye, ${currentUser.email}!`))
       }
     } catch (error) {
       console.error(
-        chalk.red('Error during logout:'),
+        chalk.redBright('Error during logout:'),
         error instanceof Error ? error.message : error
       )
     }

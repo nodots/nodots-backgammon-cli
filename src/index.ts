@@ -29,9 +29,9 @@ import { RobotStatusCommand } from './commands/robot-status'
 import { RobotStopCommand } from './commands/robot-stop'
 
 // Human vs Robot game commands
-import { HumanVsRobotCommand } from './commands/human-vs-robot'
-import { GameStatusCommand } from './commands/game-status'
 import { GameRollCommand } from './commands/game-roll'
+import { GameStatusCommand } from './commands/game-status'
+import { HumanVsRobotCommand } from './commands/human-vs-robot'
 
 async function checkAuthenticationAndPrompt(): Promise<void> {
   const authService = new AuthService()
@@ -53,8 +53,8 @@ async function checkAuthenticationAndPrompt(): Promise<void> {
 
   // Check if user is logged in
   if (!authService.isLoggedIn()) {
-    console.log(chalk.cyan('Welcome to Nodots Backgammon CLI!'))
-    console.log(chalk.yellow('You need to login to use this CLI.'))
+    console.log(chalk.cyanBright('Welcome to Nodots Backgammon CLI!'))
+    console.log(chalk.yellowBright('You need to login to use this CLI.'))
     console.log()
 
     const { shouldLogin } = await inquirer.prompt([
@@ -73,7 +73,7 @@ async function checkAuthenticationAndPrompt(): Promise<void> {
       console.log()
     } else {
       console.log(
-        chalk.gray('You can login later using: nodots-backgammon login')
+        chalk.whiteBright('You can login later using: nodots-backgammon login')
       )
       process.exit(0)
     }
@@ -81,7 +81,7 @@ async function checkAuthenticationAndPrompt(): Promise<void> {
     // User is logged in, show a brief welcome
     const currentUser = authService.getCurrentUser()
     const userDisplay = currentUser?.email || currentUser?.firstName || 'User'
-    console.log(chalk.green(`Welcome back, ${userDisplay}!`))
+    console.log(chalk.greenBright(`Welcome back, ${userDisplay}!`))
   }
 }
 
@@ -130,10 +130,21 @@ async function main() {
     // Parse and execute commands
     program.parse()
   } catch (err) {
+    // Handle commander.js exitOverride errors
     if (err instanceof Error) {
-      console.error(chalk.red('Error:'), err.message)
+      // Don't show error for version and help commands
+      const errorWithCode = err as Error & { code?: string }
+      if (
+        errorWithCode.code === 'commander.version' ||
+        errorWithCode.code === 'commander.help' ||
+        err.message === '(outputHelp)' ||
+        err.message.includes('outputHelp')
+      ) {
+        process.exit(0)
+      }
+      console.error(chalk.redBright('Error:'), err.message)
     } else {
-      console.error(chalk.red('An unexpected error occurred'))
+      console.error(chalk.redBright('An unexpected error occurred'))
     }
     process.exit(1)
   }

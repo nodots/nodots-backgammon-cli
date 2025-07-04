@@ -28,9 +28,9 @@ export class LoginCommand extends Command {
       // Check if already logged in
       if (authService.isLoggedIn()) {
         const currentUser = authService.getCurrentUser()
-        console.log(chalk.yellow('You are already logged in.'))
+        console.log(chalk.yellowBright('You are already logged in.'))
         if (currentUser?.email) {
-          console.log(chalk.gray(`Logged in as: ${currentUser.email}`))
+          console.log(chalk.whiteBright(`Logged in as: ${currentUser.email}`))
         }
 
         const { action } = await inquirer.prompt([
@@ -47,10 +47,10 @@ export class LoginCommand extends Command {
         ])
 
         if (action === 'continue') {
-          console.log(chalk.green('✅ Continuing with current session'))
+          console.log(chalk.greenBright('✅ Continuing with current session'))
           return
         } else if (action === 'cancel') {
-          console.log(chalk.gray('Login cancelled'))
+          console.log(chalk.whiteBright('Login cancelled'))
           return
         }
         // For 'relogin', continue with new login process
@@ -91,9 +91,9 @@ export class LoginCommand extends Command {
       }
     } catch (error) {
       logger.error('Login failed:', error)
-      console.log(chalk.red('❌ Login failed'))
+      console.log(chalk.redBright('❌ Login failed'))
       console.log(
-        chalk.red(error instanceof Error ? error.message : String(error))
+        chalk.redBright(error instanceof Error ? error.message : String(error))
       )
       process.exit(1)
     }
@@ -106,26 +106,32 @@ export class LoginCommand extends Command {
         !AUTH0_CONFIG.clientId ||
         AUTH0_CONFIG.clientId === 'YOUR_CLI_CLIENT_ID'
       ) {
-        console.log(chalk.red('\n❌ Auth0 configuration missing!'))
+        console.log(chalk.redBright('\n❌ Auth0 configuration missing!'))
         console.log(
-          chalk.yellow('\nTo use browser authentication, you need to:')
+          chalk.yellowBright('\nTo use browser authentication, you need to:')
         )
         console.log(
-          chalk.gray('1. Set up an Auth0 application for device flow')
+          chalk.whiteBright('1. Set up an Auth0 application for device flow')
         )
         console.log(
-          chalk.gray(
+          chalk.whiteBright(
             '2. Configure the AUTH0_CLI_CLIENT_ID environment variable'
           )
         )
-        console.log(chalk.gray('3. Or update the configuration in the code'))
         console.log(
-          chalk.gray('\nFor now, please use one of these alternatives:')
+          chalk.whiteBright('3. Or update the configuration in the code')
         )
-        console.log(chalk.gray('• Email authentication (Legacy CLI method)'))
-        console.log(chalk.gray('• API token authentication'))
         console.log(
-          chalk.gray('\nSee AUTH0_SETUP_GUIDE.md for setup instructions.\n')
+          chalk.whiteBright('\nFor now, please use one of these alternatives:')
+        )
+        console.log(
+          chalk.whiteBright('• Email authentication (Legacy CLI method)')
+        )
+        console.log(chalk.whiteBright('• API token authentication'))
+        console.log(
+          chalk.whiteBright(
+            '\nSee AUTH0_SETUP_GUIDE.md for setup instructions.\n'
+          )
         )
 
         const { fallback } = await inquirer.prompt([
@@ -146,14 +152,16 @@ export class LoginCommand extends Command {
         } else if (fallback === 'token') {
           return await this.handleInteractiveTokenLogin(authService)
         } else {
-          console.log(chalk.gray('Login cancelled'))
+          console.log(chalk.whiteBright('Login cancelled'))
           return
         }
       }
 
-      console.log(chalk.blue('\n🔐 Starting browser authentication...'))
+      console.log(chalk.whiteBright('\n🔐 Starting browser authentication...'))
       console.log(
-        chalk.gray('This will open your default browser for secure login.\n')
+        chalk.whiteBright(
+          'This will open your default browser for secure login.\n'
+        )
       )
 
       const deviceFlow = new Auth0DeviceFlow(AUTH0_CONFIG)
@@ -206,10 +214,10 @@ export class LoginCommand extends Command {
 
       authService.login(authData)
 
-      console.log(chalk.green('\n✅ Login successful!'))
-      console.log(chalk.gray(`Welcome back, ${userProfile.email}!`))
+      console.log(chalk.greenBright('\n✅ Login successful!'))
+      console.log(chalk.whiteBright(`Welcome back, ${userProfile.email}!`))
       console.log(
-        chalk.gray(
+        chalk.whiteBright(
           'You can now use CLI commands that require authentication.\n'
         )
       )
@@ -235,7 +243,7 @@ export class LoginCommand extends Command {
     }
 
     authService.login(authData)
-    console.log(chalk.green('✅ Token authentication successful'))
+    console.log(chalk.greenBright('✅ Token authentication successful'))
     logger.info('API token authentication completed')
   }
 
@@ -303,9 +311,9 @@ export class LoginCommand extends Command {
 
     authService.login(authData)
 
-    console.log(chalk.green('✅ Login successful!'))
+    console.log(chalk.greenBright('✅ Login successful!'))
     console.log(
-      chalk.gray(
+      chalk.whiteBright(
         'You can now use other CLI commands that require authentication.'
       )
     )
