@@ -216,8 +216,9 @@ export class EnhancedBoardDisplay {
   ): Promise<string> {
     try {
       const axios = await import('axios')
+      const apiVersion = process.env.NODOTS_API_VERSION || 'v3.2'
       const response = await axios.default.get(
-        `${apiUrl}/api/v1/games/${gameId}`
+        `${apiUrl}/api/${apiVersion}/games/${gameId}`
       )
       const game = response.data
 

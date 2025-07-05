@@ -7,7 +7,7 @@ async function showBoard() {
   try {
     console.log(`Fetching game state for: ${GAME_ID}`)
 
-    const response = await axios.get(`${API_URL}/api/v1/games/${GAME_ID}`)
+    const response = await axios.get(`${API_URL}/api/v3.2/games/${GAME_ID}`)
     const game = response.data
 
     console.log('\n=== Game Status ===')

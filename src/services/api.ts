@@ -15,12 +15,14 @@ export class ApiService {
 
     this.config = {
       apiUrl:
-        config?.apiUrl || process.env.NODOTS_API_URL || 'http://localhost:3000',
+        config?.apiUrl ||
+        process.env.NODOTS_API_URL ||
+        'https://localhost:3443',
       userId: config?.userId || authConfig.userId,
       apiKey: config?.apiKey || authConfig.apiKey,
     }
 
-    this.apiVersion = process.env.NODOTS_API_VERSION || 'v1'
+    this.apiVersion = process.env.NODOTS_API_VERSION || 'v3.2'
 
     this.client = axios.create({
       baseURL: this.config.apiUrl,
@@ -47,12 +49,14 @@ export class ApiService {
         const https = require('https')
         return {
           httpsAgent: new https.Agent({
-            rejectUnauthorized: process.env.NODE_ENV === 'production'
-          })
+            rejectUnauthorized: process.env.NODE_ENV === 'production',
+          }),
         }
       } catch (error) {
         // If https module is not available, continue without SSL configuration
-        console.warn('Warning: HTTPS module not available, SSL configuration skipped')
+        console.warn(
+          'Warning: HTTPS module not available, SSL configuration skipped'
+        )
         return {}
       }
     }
@@ -76,7 +80,9 @@ export class ApiService {
 
   async getGame(gameId: string): Promise<ApiResponse<BackgammonGame>> {
     try {
-      const response = await this.client.get(`/api/${this.apiVersion}/games/${gameId}`)
+      const response = await this.client.get(
+        `/api/${this.apiVersion}/games/${gameId}`
+      )
       return { success: true, data: response.data }
     } catch (error) {
       return this.handleError(error)
@@ -85,7 +91,9 @@ export class ApiService {
 
   async rollDice(gameId: string): Promise<ApiResponse<BackgammonGame>> {
     try {
-      const response = await this.client.post(`/api/${this.apiVersion}/games/${gameId}/roll`)
+      const response = await this.client.post(
+        `/api/${this.apiVersion}/games/${gameId}/roll`
+      )
       return { success: true, data: response.data }
     } catch (error) {
       return this.handleError(error)
@@ -98,10 +106,13 @@ export class ApiService {
     to: number
   ): Promise<ApiResponse<BackgammonGame>> {
     try {
-      const response = await this.client.post(`/api/${this.apiVersion}/games/${gameId}/move`, {
-        from,
-        to,
-      })
+      const response = await this.client.post(
+        `/api/${this.apiVersion}/games/${gameId}/move`,
+        {
+          from,
+          to,
+        }
+      )
       return { success: true, data: response.data }
     } catch (error) {
       return this.handleError(error)
@@ -126,7 +137,10 @@ export class ApiService {
     locale: string
   }): Promise<ApiResponse<any>> {
     try {
-      const response = await this.client.post(`/api/${this.apiVersion}/users`, userData)
+      const response = await this.client.post(
+        `/api/${this.apiVersion}/users`,
+        userData
+      )
       return { success: true, data: response.data }
     } catch (error) {
       return this.handleError(error)
@@ -149,12 +163,15 @@ export class ApiService {
     robot2Difficulty?: string
   }): Promise<ApiResponse<any>> {
     try {
-      const response = await this.client.post(`/api/${this.apiVersion}/robots/simulations`, {
-        speed: 1000,
-        robot1Difficulty: 'beginner',
-        robot2Difficulty: 'beginner',
-        ...config,
-      })
+      const response = await this.client.post(
+        `/api/${this.apiVersion}/robots/simulations`,
+        {
+          speed: 1000,
+          robot1Difficulty: 'beginner',
+          robot2Difficulty: 'beginner',
+          ...config,
+        }
+      )
       return { success: true, data: response.data }
     } catch (error) {
       return this.handleError(error)
@@ -212,10 +229,46 @@ export class ApiService {
   }
 
   // Human vs Robot game creation
-  async createHumanVsRobotGame(): Promise<ApiResponse<BackgammonGame>> {
+  async createHumanVsRobotGame(
+    robotUserId?: string
+  ): Promise<ApiResponse<BackgammonGame>> {
     try {
+      // Get current user ID
+      const humanUserId = this.config.userId
+      if (!humanUserId) {
+        return {
+          success: false,
+          error: 'No user ID found. Please authenticate first.',
+        }
+      }
+
+      // Get robot user ID
+      let robotId = robotUserId
+      if (!robotId) {
+        // If no specific robot ID provided, find the first available robot
+        const usersResponse = await this.getUsers()
+        if (!usersResponse.success) {
+          return {
+            success: false,
+            error: 'Failed to fetch users to find robot player',
+          }
+        }
+
+        const users = usersResponse.data || []
+        const robotUser = users.find((user: any) => user.userType === 'robot')
+        if (!robotUser) {
+          return {
+            success: false,
+            error: 'Robot player not found',
+          }
+        }
+        robotId = robotUser.id
+      }
+
+      // Create game with proper payload structure
       const response = await this.client.post(`/api/${this.apiVersion}/games`, {
-        opponent: 'robot'
+        player1: { userId: humanUserId },
+        player2: { userId: robotId },
       })
       return { success: true, data: response.data }
     } catch (error) {
@@ -227,7 +280,10 @@ export class ApiService {
     if (axios.isAxiosError(error)) {
       return {
         success: false,
-        error: error.response?.data?.message || error.response?.data?.error || error.message,
+        error:
+          error.response?.data?.message ||
+          error.response?.data?.error ||
+          error.message,
       }
     }
     return {
