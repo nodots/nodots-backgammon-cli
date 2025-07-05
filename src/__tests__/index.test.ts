@@ -7,7 +7,7 @@ describe('CLI Tests', () => {
   describe('ApiService', () => {
     it('should create instance with config', () => {
       const config: CliConfig = {
-        apiUrl: 'http://localhost:3000',
+        apiUrl: 'https://localhost:3443',
       }
       const apiService = new ApiService(config)
       expect(apiService).toBeInstanceOf(ApiService)

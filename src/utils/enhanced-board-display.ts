@@ -212,7 +212,7 @@ export class EnhancedBoardDisplay {
 
   static async renderFromAPI(
     gameId: string,
-    apiUrl: string = 'http://localhost:3000'
+    apiUrl: string = 'https://localhost:3443'
   ): Promise<string> {
     try {
       const axios = await import('axios')

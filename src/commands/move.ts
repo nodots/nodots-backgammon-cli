@@ -21,7 +21,7 @@ export class MoveCommand extends Command {
   ): Promise<void> {
     try {
       const config: CliConfig = {
-        apiUrl: process.env.NODOTS_API_URL || 'http://localhost:3000',
+        apiUrl: process.env.NODOTS_API_URL || 'https://localhost:3443',
         userId: process.env.NODOTS_USER_ID,
         apiKey: process.env.NODOTS_API_KEY,
       }
