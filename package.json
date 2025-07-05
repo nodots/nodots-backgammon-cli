@@ -30,7 +30,7 @@
   "author": "Ken Riley <kenr@nodots.com>",
   "license": "MIT",
   "dependencies": {
-    "@nodots-llc/backgammon-types": "^3.2.0",
+    "@nodots-llc/backgammon-types": "^3.2.1",
     "axios": "^1.10.0",
     "chalk": "^4.1.2",
     "commander": "^11.1.0",
