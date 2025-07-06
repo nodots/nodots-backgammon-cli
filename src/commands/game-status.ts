@@ -63,9 +63,8 @@ export class GameStatusCommand extends Command {
       game.players.forEach((player: any, index: number) => {
         const isActive = player.color === game.activeColor
 
-        // For human vs robot games, assume first player is human, second is robot
-        // This matches the order we send in createHumanVsRobotGame (player1=human, player2=robot)
-        const isHuman = index === 0
+        // Fix: Use player.id === humanUserId to identify the human player
+        const isHuman = player.id === apiConfig.userId
 
         const icon = isHuman ? '👤' : '🤖'
         const type = isHuman ? 'Human' : 'Robot'

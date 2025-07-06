@@ -81,9 +81,8 @@ export class HumanVsRobotCommand extends Command {
       console.log(chalk.cyanBright('\n👥 Players:'))
 
       game.players.forEach((player: any, index: number) => {
-        // For human vs robot games, assume first player is human, second is robot
-        // This matches the order we send in createHumanVsRobotGame (player1=human, player2=robot)
-        const isHuman = index === 0
+        // Fix: Use player.id === humanUserId to identify the human player
+        const isHuman = player.id === apiConfig.userId
 
         const icon = isHuman ? '👤' : '🤖'
         const type = isHuman ? 'Human' : 'Robot'
