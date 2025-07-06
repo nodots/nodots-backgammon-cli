@@ -78,12 +78,19 @@ export class HumanVsRobotCommand extends Command {
       console.log(chalk.whiteBright(`🎲 State: ${game.stateKind}`))
       console.log(chalk.whiteBright(`🎯 Active Color: ${game.activeColor}`))
 
+      // DEBUG: Print the actual player data and current user ID
+      console.log(chalk.magentaBright('\n� DEBUG INFO:'))
+      console.log(chalk.magentaBright(`Current user ID: ${apiConfig.userId}`))
+      console.log(chalk.magentaBright('Players data:'))
+      game.players.forEach((player: any, index: number) => {
+        console.log(chalk.magentaBright(`  Player ${index}: id=${player.id}, color=${player.color}, direction=${player.direction}`))
+      })
+
       console.log(chalk.cyanBright('\n👥 Players:'))
 
       game.players.forEach((player: any, index: number) => {
-        // For human vs robot games, assume first player is human, second is robot
-        // This matches the order we send in createHumanVsRobotGame (player1=human, player2=robot)
-        const isHuman = index === 0
+        // Fix: Use player.id === humanUserId to identify the human player
+        const isHuman = player.id === apiConfig.userId
 
         const icon = isHuman ? '👤' : '🤖'
         const type = isHuman ? 'Human' : 'Robot'
