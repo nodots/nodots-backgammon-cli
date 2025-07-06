@@ -78,14 +78,6 @@ export class HumanVsRobotCommand extends Command {
       console.log(chalk.whiteBright(`🎲 State: ${game.stateKind}`))
       console.log(chalk.whiteBright(`🎯 Active Color: ${game.activeColor}`))
 
-      // DEBUG: Print the actual player data and current user ID
-      console.log(chalk.magentaBright('\n� DEBUG INFO:'))
-      console.log(chalk.magentaBright(`Current user ID: ${apiConfig.userId}`))
-      console.log(chalk.magentaBright('Players data:'))
-      game.players.forEach((player: any, index: number) => {
-        console.log(chalk.magentaBright(`  Player ${index}: id=${player.id}, color=${player.color}, direction=${player.direction}`))
-      })
-
       console.log(chalk.cyanBright('\n👥 Players:'))
 
       game.players.forEach((player: any, index: number) => {
