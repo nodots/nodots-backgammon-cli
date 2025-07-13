@@ -59,7 +59,7 @@ export class RobotPauseCommand extends Command {
 
       console.log(
         chalk.gray(
-          `Use "nodots-backgammon robot-status ${simulationId}" to check the current status`
+          `Use "ndbg robot-status ${simulationId}" to check the current status`
         )
       )
     } catch (error) {

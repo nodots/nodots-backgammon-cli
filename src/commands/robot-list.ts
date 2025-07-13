@@ -76,7 +76,7 @@ export class RobotListCommand extends Command {
       console.log()
       console.log(
         chalk.gray(
-          'Use "nodots-backgammon robot-simulate --interactive" to start a simulation'
+          'Use "ndbg robot-simulate --interactive" to start a simulation'
         )
       )
     } catch (error) {

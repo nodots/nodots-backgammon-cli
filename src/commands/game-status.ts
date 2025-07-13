@@ -20,14 +20,24 @@ export class GameStatusCommand extends Command {
 
       if (!apiConfig.apiKey) {
         console.log(
-          chalk.redBright(
-            '❌ Not authenticated. Please run: nodots-backgammon login'
-          )
+          chalk.redBright('❌ Not authenticated. Please run: ndbg login')
         )
         return
       }
 
       const apiService = new ApiService()
+
+      // Get users list to properly identify human vs robot players
+      const usersResponse = await apiService.getUsers()
+      if (!usersResponse.success) {
+        console.error(
+          chalk.redBright('❌ Failed to fetch users:', usersResponse.error)
+        )
+        return
+      }
+
+      const users = usersResponse.data || []
+
       const response = await apiService.getGame(gameId)
 
       if (!response.success) {
@@ -43,6 +53,19 @@ export class GameStatusCommand extends Command {
       console.log(chalk.whiteBright(`\n🎮 Game: ${game.id}`))
       console.log(chalk.whiteBright(`🎲 State: ${game.stateKind}`))
       console.log(chalk.whiteBright(`🎯 Active Color: ${game.activeColor}`))
+
+      // Show current roll for active player
+      if (gameAny.activePlayer?.dice?.currentRoll) {
+        const currentRoll = gameAny.activePlayer.dice.currentRoll
+        const total =
+          gameAny.activePlayer.dice.total ||
+          currentRoll.reduce((a: number, b: number) => a + b, 0)
+        console.log(
+          chalk.yellowBright(
+            `🎲 Current Roll: [${currentRoll.join(', ')}] (Total: ${total})`
+          )
+        )
+      }
 
       if (gameAny.lastRoll) {
         console.log(
@@ -63,8 +86,9 @@ export class GameStatusCommand extends Command {
       game.players.forEach((player: any, index: number) => {
         const isActive = player.color === game.activeColor
 
-        // Fix: Use player.id === humanUserId to identify the human player
-        const isHuman = player.id === apiConfig.userId
+        // Fix: Use player.userId to match against users list and identify human vs robot
+        const user = users.find((u: any) => u.id === player.userId) as any
+        const isHuman = user ? user.userType === 'human' : false
 
         const icon = isHuman ? '👤' : '🤖'
         const type = isHuman ? 'Human' : 'Robot'
@@ -83,34 +107,26 @@ export class GameStatusCommand extends Command {
         game.stateKind === 'rolling-for-start' ||
         game.stateKind === 'rolled-for-start'
       ) {
-        console.log(
-          chalk.whiteBright(
-            `• Roll dice: nodots-backgammon game-roll ${gameId}`
-          )
-        )
+        console.log(chalk.whiteBright(`• Roll dice: ndbg game-roll ${gameId}`))
       }
       if (game.stateKind === 'rolled') {
         console.log(
-          chalk.whiteBright(
-            `• Interactive play: nodots-backgammon game-play ${gameId}`
-          )
+          chalk.whiteBright(`• Interactive play: ndbg game-play ${gameId}`)
         )
         console.log(
-          chalk.whiteBright(
-            `• Make a move: nodots-backgammon move ${gameId} <from> <to>`
-          )
+          chalk.whiteBright(`• Make a move: ndbg move ${gameId} <from> <to>`)
         )
       }
       if (game.stateKind === 'rolled-for-start') {
-        console.log(
-          chalk.whiteBright(`• Continue: nodots-backgammon game-roll ${gameId}`)
-        )
+        console.log(chalk.whiteBright(`• Continue: ndbg game-roll ${gameId}`))
       }
 
-      // Show ASCII board if available
-      if (gameAny.ascii) {
+      // Show ASCII board from API - ALWAYS use API's asciiBoard
+      if (gameAny.asciiBoard) {
         console.log(chalk.cyanBright('\n📋 Board:'))
-        console.log(gameAny.ascii)
+        console.log(gameAny.asciiBoard)
+      } else {
+        console.log(chalk.redBright('\n⚠️  No ASCII board available from API'))
       }
     } catch (error: any) {
       console.error(chalk.redBright(`❌ Unexpected error: ${error.message}`))

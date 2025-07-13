@@ -165,15 +165,9 @@ export class RobotSimulateCommand extends Command {
       console.log(
         chalk.yellow('\nUse the following commands to monitor the simulation:')
       )
-      console.log(
-        chalk.white(`  nodots-backgammon robot-status ${simulation.id}`)
-      )
-      console.log(
-        chalk.white(`  nodots-backgammon robot-pause ${simulation.id}`)
-      )
-      console.log(
-        chalk.white(`  nodots-backgammon robot-stop ${simulation.id}`)
-      )
+      console.log(chalk.white(`  ndbg robot-status ${simulation.id}`))
+      console.log(chalk.white(`  ndbg robot-pause ${simulation.id}`))
+      console.log(chalk.white(`  ndbg robot-stop ${simulation.id}`))
     } catch (error) {
       console.error(chalk.red('Error starting simulation:'), error)
     }

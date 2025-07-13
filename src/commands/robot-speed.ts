@@ -141,7 +141,7 @@ export class RobotSpeedCommand extends Command {
 
       console.log(
         chalk.gray(
-          `Use "nodots-backgammon robot-status ${simulationId}" to monitor the simulation`
+          `Use "ndbg robot-status ${simulationId}" to monitor the simulation`
         )
       )
     } catch (error) {

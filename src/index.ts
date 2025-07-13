@@ -12,7 +12,7 @@ import { LogoutCommand } from './commands/logout'
 
 // TODO: Create command classes and import them
 // import { JoinCommand } from './commands/join'
-// import { MoveCommand } from './commands/move'
+import { MoveCommand } from './commands/move'
 // import { NewCommand } from './commands/new'
 // import { PlayCommand } from './commands/play'
 // import { RollCommand } from './commands/roll'
@@ -29,9 +29,10 @@ import { RobotStatusCommand } from './commands/robot-status'
 import { RobotStopCommand } from './commands/robot-stop'
 
 // Human vs Robot game commands
-import { HumanVsRobotCommand } from './commands/human-vs-robot'
-import { GameStatusCommand } from './commands/game-status'
+import { GamePlayCommand } from './commands/game-play'
 import { GameRollCommand } from './commands/game-roll'
+import { GameStatusCommand } from './commands/game-status'
+import { HumanVsRobotCommand } from './commands/human-vs-robot'
 
 async function checkAuthenticationAndPrompt(): Promise<void> {
   const authService = new AuthService()
@@ -72,9 +73,7 @@ async function checkAuthenticationAndPrompt(): Promise<void> {
       await loginCommand.execute()
       console.log()
     } else {
-      console.log(
-        chalk.gray('You can login later using: nodots-backgammon login')
-      )
+      console.log(chalk.gray('You can login later using: ndbg login'))
       process.exit(0)
     }
   } else {
@@ -88,7 +87,7 @@ async function checkAuthenticationAndPrompt(): Promise<void> {
 const program = new Command()
 
 program
-  .name('nodots-backgammon')
+  .name('ndbg')
   .description('Command-line interface for Nodots Backgammon')
   .version(version)
 
@@ -100,7 +99,7 @@ program.addCommand(new LogoutCommand())
 // program.addCommand(new NewCommand())
 // program.addCommand(new JoinCommand())
 // program.addCommand(new StatusCommand())
-// program.addCommand(new MoveCommand())
+program.addCommand(new MoveCommand())
 // program.addCommand(new RollCommand())
 // program.addCommand(new PlayCommand())
 
@@ -108,6 +107,7 @@ program.addCommand(new LogoutCommand())
 program.addCommand(new HumanVsRobotCommand())
 program.addCommand(new GameStatusCommand())
 program.addCommand(new GameRollCommand())
+program.addCommand(new GamePlayCommand())
 
 // Add robot simulation commands
 program.addCommand(new RobotListCommand())

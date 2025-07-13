@@ -10,7 +10,7 @@ import { logger } from '../utils/logger'
 const AUTH0_CONFIG = {
   domain: process.env.AUTH0_DOMAIN || 'dev-8ykjldydiqcf2hqu.us.auth0.com',
   clientId: process.env.AUTH0_CLI_CLIENT_ID || 'YOUR_CLI_CLIENT_ID', // Configure via AUTH0_CLI_CLIENT_ID env var
-  audience: process.env.AUTH0_AUDIENCE || 'nodots-backgammon-api',
+  audience: process.env.AUTH0_AUDIENCE || 'backgammon-api',
 }
 
 export class LoginCommand extends Command {

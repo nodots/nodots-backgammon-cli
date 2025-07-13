@@ -2,7 +2,6 @@ import chalk from 'chalk'
 import { Command } from 'commander'
 import { ApiService } from '../services/api'
 import { CliConfig } from '../types'
-import { BoardDisplay } from '../utils/board-display'
 
 export class StatusCommand extends Command {
   constructor() {
@@ -35,8 +34,14 @@ export class StatusCommand extends Command {
         return
       }
 
-      // Display the board
-      console.log(BoardDisplay.renderBoard(game))
+      // Display the board - ALWAYS use API's asciiBoard
+      const gameAny = game as any
+      if (gameAny.asciiBoard) {
+        console.log(chalk.cyanBright('📋 Board:'))
+        console.log(gameAny.asciiBoard)
+      } else {
+        console.log(chalk.redBright('⚠️  No ASCII board available from API'))
+      }
     } catch (error) {
       console.error(chalk.red('Error fetching game status:'), error)
     }

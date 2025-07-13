@@ -2,7 +2,6 @@ import chalk from 'chalk'
 import { Command } from 'commander'
 import { ApiService } from '../services/api'
 import { CliConfig } from '../types'
-import { EnhancedBoardDisplay } from '../utils/enhanced-board-display'
 
 export class RobotBoardCommand extends Command {
   constructor() {
@@ -73,8 +72,14 @@ export class RobotBoardCommand extends Command {
         console.log(chalk.yellow('\n=== Raw Game Data ==='))
         console.log(JSON.stringify(game, null, 2))
       } else {
-        // Show enhanced board
-        console.log(EnhancedBoardDisplay.renderBoard(game))
+        // Show board - ALWAYS use API's asciiBoard
+        const gameAny = game as any
+        if (gameAny.asciiBoard) {
+          console.log(chalk.cyanBright('📋 Board:'))
+          console.log(gameAny.asciiBoard)
+        } else {
+          console.log(chalk.redBright('⚠️  No ASCII board available from API'))
+        }
 
         // Show additional robot simulation info
         this.showSimulationInfo(simulationId, apiService)
@@ -152,15 +157,9 @@ export class RobotBoardCommand extends Command {
 
       // Show usage hints
       console.log(chalk.dim('\nCommands:'))
-      console.log(
-        chalk.dim(`  nodots-backgammon robot-status ${simulationId} --watch`)
-      )
-      console.log(chalk.dim(`  nodots-backgammon robot-pause ${simulationId}`))
-      console.log(
-        chalk.dim(
-          `  nodots-backgammon robot-speed ${simulationId} --interactive`
-        )
-      )
+      console.log(chalk.dim(`  ndbg robot-status ${simulationId} --watch`))
+      console.log(chalk.dim(`  ndbg robot-pause ${simulationId}`))
+      console.log(chalk.dim(`  ndbg robot-speed ${simulationId} --interactive`))
     } catch (error) {
       // Silently ignore simulation info errors
     }

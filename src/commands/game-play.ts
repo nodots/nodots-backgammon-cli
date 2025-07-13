@@ -4,9 +4,9 @@ import inquirer from 'inquirer'
 import { ApiService } from '../services/api'
 import { CliConfig } from '../types'
 
-export class PlayCommand extends Command {
+export class GamePlayCommand extends Command {
   constructor() {
-    super('play')
+    super('game-play')
     this.description('Start interactive game session')
       .argument('<game-id>', 'Game ID')
       .action(this.execute.bind(this))
@@ -115,6 +115,18 @@ export class PlayCommand extends Command {
       }
 
       console.log(chalk.green('Dice rolled successfully!'))
+
+      // Display the updated board after rolling
+      const updatedGameResponse = await apiService.getGame(gameId)
+      if (updatedGameResponse.success && updatedGameResponse.data) {
+        const updatedGameAny = updatedGameResponse.data as any
+        if (updatedGameAny.asciiBoard) {
+          console.log(chalk.cyanBright('📋 Board:'))
+          console.log(updatedGameAny.asciiBoard)
+        } else {
+          console.log(chalk.redBright('⚠️  No ASCII board available from API'))
+        }
+      }
     } catch (error) {
       console.error(chalk.red('Error rolling dice:'), error)
     }
@@ -160,6 +172,17 @@ export class PlayCommand extends Command {
       }
 
       console.log(chalk.green('Move made successfully!'))
+
+      // Display the updated board after moving
+      if (gameResponse.data) {
+        const movedGameAny = gameResponse.data as any
+        if (movedGameAny.asciiBoard) {
+          console.log(chalk.cyanBright('📋 Board:'))
+          console.log(movedGameAny.asciiBoard)
+        } else {
+          console.log(chalk.redBright('⚠️  No ASCII board available from API'))
+        }
+      }
     } catch (error) {
       console.error(chalk.red('Error making move:'), error)
     }

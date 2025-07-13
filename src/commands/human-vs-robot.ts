@@ -3,6 +3,7 @@ import { Command } from 'commander'
 import inquirer from 'inquirer'
 import { ApiService } from '../services/api'
 import { AuthService } from '../services/auth'
+import { logger } from '../utils/logger'
 
 export class HumanVsRobotCommand extends Command {
   constructor() {
@@ -19,11 +20,11 @@ export class HumanVsRobotCommand extends Command {
       const authService = new AuthService()
       const apiConfig = authService.getApiConfig()
 
+      logger.info('apiConfig', apiConfig)
+
       if (!apiConfig.apiKey) {
         console.log(
-          chalk.redBright(
-            '❌ Not authenticated. Please run: nodots-backgammon login'
-          )
+          chalk.redBright('❌ Not authenticated. Please run: ndbg login')
         )
         return
       }
@@ -32,6 +33,7 @@ export class HumanVsRobotCommand extends Command {
 
       // Get available robots
       const usersResponse = await apiService.getUsers()
+      logger.info('usersResponse', usersResponse)
       if (!usersResponse.success) {
         console.error(
           chalk.redBright('❌ Failed to fetch robots:', usersResponse.error)
@@ -62,7 +64,10 @@ export class HumanVsRobotCommand extends Command {
         },
       ])
 
-      const response = await apiService.createHumanVsRobotGame(selectedRobotId)
+      const response = await apiService.createGame(
+        apiConfig.userId!,
+        selectedRobotId
+      )
 
       if (!response.success) {
         console.error(
@@ -80,30 +85,34 @@ export class HumanVsRobotCommand extends Command {
 
       console.log(chalk.cyanBright('\n👥 Players:'))
 
-      game.players.forEach((player: any, index: number) => {
-        // Fix: Use player.id === humanUserId to identify the human player
-        const isHuman = player.id === apiConfig.userId
+      // Use the already-fetched users list to identify human vs robot players
+      for (const player of game.players) {
+        const user = users.find((u: any) => u.id === player.userId) as any
+        if (user) {
+          const isHuman = user.userType === 'human'
 
-        const icon = isHuman ? '👤' : '🤖'
-        const type = isHuman ? 'Human' : 'Robot'
-        console.log(
-          `${icon} ${type}: ${player.color.toUpperCase()} (${player.direction})`
-        )
-      })
+          const icon = isHuman ? '👤' : '🤖'
+          const type = isHuman ? 'Human' : 'Robot'
+          console.log(
+            `${icon} ${type}: ${player.color.toUpperCase()} (${
+              player.direction
+            })`
+          )
+        } else {
+          // Fallback if user not found in the list
+          console.log(
+            `❓ Unknown: ${player.color.toUpperCase()} (${player.direction})`
+          )
+        }
+      }
 
       console.log(chalk.yellowBright('\n🎯 Next steps:'))
       console.log(
-        chalk.whiteBright(
-          `• Check status: nodots-backgammon game-status ${game.id}`
-        )
+        chalk.whiteBright(`• Check status: ndbg game-status ${game.id}`)
       )
+      console.log(chalk.whiteBright(`• Roll dice: ndbg game-roll ${game.id}`))
       console.log(
-        chalk.whiteBright(`• Roll dice: nodots-backgammon game-roll ${game.id}`)
-      )
-      console.log(
-        chalk.whiteBright(
-          `• Interactive play: nodots-backgammon game-play ${game.id}`
-        )
+        chalk.whiteBright(`• Interactive play: ndbg game-play ${game.id}`)
       )
     } catch (error: any) {
       console.error(chalk.redBright(`❌ Unexpected error: ${error.message}`))
