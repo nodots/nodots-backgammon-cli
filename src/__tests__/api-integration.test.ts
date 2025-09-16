@@ -26,8 +26,8 @@ describe('CLI API Integration', () => {
   describe('API Connection Management', () => {
     it('should handle API endpoint configuration', () => {
       const apiEndpoints = [
-        'https://localhost:3443/api/v3.6',
-        'https://api.nodots.com/v3.6', // Production
+        'https://localhost:3443/api/v3.7',
+        'https://api.nodots.com/v3.7', // Production
       ]
 
       for (const endpoint of apiEndpoints) {
@@ -39,15 +39,15 @@ describe('CLI API Integration', () => {
     it('should validate SSL certificate handling', async () => {
       // Test HTTPS endpoint with SSL handling
       mockedAxios.get.mockResolvedValueOnce({
-        data: { status: 'ok', version: 'v3.6' },
+        data: { status: 'ok', version: 'v3.7' },
       })
 
       try {
         const response = await mockedAxios.get(
-          'https://localhost:3443/api/v3.6/health'
+          'https://localhost:3443/api/v3.7/health'
         )
         expect(response.data).toBeDefined()
-        expect(response.data.version).toBe('v3.6')
+        expect(response.data.version).toBe('v3.7')
       } catch (error) {
         // Expected in test environment
         expect(error).toBeInstanceOf(Error)
@@ -59,7 +59,7 @@ describe('CLI API Integration', () => {
       mockedAxios.get.mockRejectedValueOnce(new Error('timeout'))
 
       try {
-        await mockedAxios.get('https://localhost:3443/api/v3.6/games', {
+        await mockedAxios.get('https://localhost:3443/api/v3.7/games', {
           timeout: 5000,
         })
       } catch (error) {
@@ -82,7 +82,7 @@ describe('CLI API Integration', () => {
         )
 
         try {
-          await mockedAxios.get('https://localhost:3443/api/v3.6/games')
+          await mockedAxios.get('https://localhost:3443/api/v3.7/games')
         } catch (error) {
           expect(error).toBeInstanceOf(Error)
           expect((error as any).code).toBe(code)
@@ -107,7 +107,7 @@ describe('CLI API Integration', () => {
 
         try {
           const response = await mockedAxios.post(
-            'https://localhost:3443/api/v3.6/auth/verify',
+            'https://localhost:3443/api/v3.7/auth/verify',
             {},
             {
               headers: {
@@ -138,7 +138,7 @@ describe('CLI API Integration', () => {
       })
 
       const response = await mockedAxios.post(
-        'https://localhost:3443/api/v3.6/auth/cli',
+        'https://localhost:3443/api/v3.7/auth/cli',
         { token: cliToken }
       )
 
@@ -159,7 +159,7 @@ describe('CLI API Integration', () => {
         })
 
         try {
-          await mockedAxios.post('https://localhost:3443/api/v3.6/auth/verify')
+          await mockedAxios.post('https://localhost:3443/api/v3.7/auth/verify')
         } catch (error: any) {
           expect(error.response.status).toBe(status)
           expect(error.response.data.error).toBe(message)
@@ -192,7 +192,7 @@ describe('CLI API Integration', () => {
       })
 
       const response = await mockedAxios.post(
-        'https://localhost:3443/api/v3.6/games',
+        'https://localhost:3443/api/v3.7/games',
         gameCreationData
       )
 
@@ -218,7 +218,7 @@ describe('CLI API Integration', () => {
       })
 
       const response = await mockedAxios.get(
-        'https://localhost:3443/api/v3.6/games',
+        'https://localhost:3443/api/v3.7/games',
         {
           params: {
             status: 'active',
@@ -260,7 +260,7 @@ describe('CLI API Integration', () => {
       })
 
       const response = await mockedAxios.get(
-        'https://localhost:3443/api/v3.6/games/game-123'
+        'https://localhost:3443/api/v3.7/games/game-123'
       )
 
       expect(response.data.id).toBe('game-123')
@@ -286,7 +286,7 @@ describe('CLI API Integration', () => {
       })
 
       const response = await mockedAxios.post(
-        'https://localhost:3443/api/v3.6/games/game-123/move',
+        'https://localhost:3443/api/v3.7/games/game-123/move',
         moveData
       )
 
@@ -314,7 +314,7 @@ describe('CLI API Integration', () => {
       })
 
       const response = await mockedAxios.post(
-        'https://localhost:3443/api/v3.6/robots',
+        'https://localhost:3443/api/v3.7/robots',
         robotData
       )
 
@@ -341,7 +341,7 @@ describe('CLI API Integration', () => {
       })
 
       const response = await mockedAxios.post(
-        'https://localhost:3443/api/v3.6/simulations',
+        'https://localhost:3443/api/v3.7/simulations',
         simulationData
       )
 
@@ -368,7 +368,7 @@ describe('CLI API Integration', () => {
       })
 
       const response = await mockedAxios.get(
-        'https://localhost:3443/api/v3.6/robots/robot-123/stats'
+        'https://localhost:3443/api/v3.7/robots/robot-123/stats'
       )
 
       expect(response.data.stats.winRate).toBeGreaterThan(0)
@@ -396,7 +396,7 @@ describe('CLI API Integration', () => {
       })
 
       try {
-        await mockedAxios.post('https://localhost:3443/api/v3.6/games', {
+        await mockedAxios.post('https://localhost:3443/api/v3.7/games', {
           invalidData: true,
         })
       } catch (error: any) {
@@ -416,7 +416,7 @@ describe('CLI API Integration', () => {
       })
 
       try {
-        await mockedAxios.get('https://localhost:3443/api/v3.6/games')
+        await mockedAxios.get('https://localhost:3443/api/v3.7/games')
       } catch (error: any) {
         expect(error.response.status).toBe(429)
         expect(error.response.data.error).toContain('Rate limit')
@@ -438,7 +438,7 @@ describe('CLI API Integration', () => {
         })
 
         try {
-          await mockedAxios.get('https://localhost:3443/api/v3.6/health')
+          await mockedAxios.get('https://localhost:3443/api/v3.7/health')
         } catch (error: any) {
           expect(error.response.status).toBe(status)
           expect(error.response.data.error).toBe(message)
@@ -458,7 +458,7 @@ describe('CLI API Integration', () => {
       while (attempts < maxRetries) {
         try {
           const response = await mockedAxios.get(
-            'https://localhost:3443/api/v3.6/health'
+            'https://localhost:3443/api/v3.7/health'
           )
           expect(response.data.status).toBe('ok')
           break
@@ -485,7 +485,7 @@ describe('CLI API Integration', () => {
       })
 
       const startTime = Date.now()
-      await mockedAxios.get('https://localhost:3443/api/v3.6/health')
+      await mockedAxios.get('https://localhost:3443/api/v3.7/health')
       const responseTime = Date.now() - startTime
 
       expect(responseTime).toBeGreaterThanOrEqual(100)
@@ -501,7 +501,7 @@ describe('CLI API Integration', () => {
 
       const promises = Array(concurrentRequests)
         .fill(0)
-        .map(() => mockedAxios.get('https://localhost:3443/api/v3.6/games'))
+        .map(() => mockedAxios.get('https://localhost:3443/api/v3.7/games'))
 
       const results = await Promise.all(promises)
 
@@ -515,7 +515,7 @@ describe('CLI API Integration', () => {
       const healthChecks = [
         { endpoint: '/health', expected: { status: 'ok' } },
         { endpoint: '/metrics', expected: { uptime: expect.any(Number) } },
-        { endpoint: '/version', expected: { version: 'v3.6' } },
+        { endpoint: '/version', expected: { version: 'v3.7' } },
       ]
 
       for (const { endpoint, expected } of healthChecks) {
@@ -525,11 +525,11 @@ describe('CLI API Integration', () => {
               ? { status: 'ok' }
               : endpoint === '/metrics'
               ? { uptime: 12345 }
-              : { version: 'v3.6' },
+              : { version: 'v3.7' },
         })
 
         const response = await mockedAxios.get(
-          `https://localhost:3443/api/v3.6${endpoint}`
+          `https://localhost:3443/api/v3.7${endpoint}`
         )
 
         if (endpoint === '/health') {
@@ -537,7 +537,7 @@ describe('CLI API Integration', () => {
         } else if (endpoint === '/metrics') {
           expect(response.data.uptime).toBeGreaterThan(0)
         } else {
-          expect(response.data.version).toBe('v3.6')
+          expect(response.data.version).toBe('v3.7')
         }
       }
     })
@@ -567,7 +567,7 @@ describe('CLI API Integration', () => {
       try {
         // This should handle serialization properly
         await mockedAxios.post(
-          'https://localhost:3443/api/v3.6/games',
+          'https://localhost:3443/api/v3.7/games',
           testData
         )
         expect(mockedAxios.post).toHaveBeenCalled()
@@ -610,13 +610,13 @@ describe('CLI API Integration', () => {
     })
 
     it('should handle API version compatibility', async () => {
-      const apiVersions = ['v3.6']
+      const apiVersions = ['v3.7']
 
       for (const version of apiVersions) {
         mockedAxios.get.mockResolvedValueOnce({
           data: {
             version,
-            compatible: version === 'v3.6',
+            compatible: version === 'v3.7',
             deprecated: false,
           },
         })
@@ -627,7 +627,7 @@ describe('CLI API Integration', () => {
 
         expect(response.data.version).toBe(version)
 
-        if (version === 'v3.6') {
+        if (version === 'v3.7') {
           expect(response.data.compatible).toBe(true)
         }
       }
