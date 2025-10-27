@@ -14,7 +14,7 @@ export class RobotPauseCommand extends Command {
   private async execute(simulationId: string): Promise<void> {
     try {
       const config: CliConfig = {
-        apiUrl: process.env.NODOTS_API_URL || 'http://localhost:3000',
+        apiUrl: process.env.NODOTS_API_URL || 'https://localhost:3443',
         userId: process.env.NODOTS_USER_ID,
         apiKey: process.env.NODOTS_API_KEY,
       }
@@ -59,7 +59,7 @@ export class RobotPauseCommand extends Command {
 
       console.log(
         chalk.gray(
-          `Use "nodots-backgammon robot-status ${simulationId}" to check the current status`
+          `Use "ndbg robot-status ${simulationId}" to check the current status`
         )
       )
     } catch (error) {

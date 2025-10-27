@@ -1,5 +1,6 @@
 import { BackgammonGame, BackgammonPlayer } from '@nodots-llc/backgammon-types'
 import axios, { AxiosInstance } from 'axios'
+import chalk from 'chalk'
 import { ApiResponse, CliConfig } from '../types'
 import { AuthService } from './auth'
 
@@ -34,7 +35,7 @@ export class ApiService {
     })
 
     // Add request interceptor for authentication
-    this.client.interceptors.request.use((config) => {
+    this.client.interceptors.request.use((config: any) => {
       if (this.config.apiKey) {
         config.headers.Authorization = `Bearer ${this.config.apiKey}`
       }
@@ -115,6 +116,32 @@ export class ApiService {
       )
       return { success: true, data: response.data }
     } catch (error) {
+      return this.handleError(error)
+    }
+  }
+
+  async makeMoveWithCheckerId(
+    gameId: string,
+    checkerId: string
+  ): Promise<ApiResponse<BackgammonGame>> {
+    try {
+      console.log(chalk.blue(`Making move with checkerId: ${checkerId}`))
+      console.log(chalk.blue(`Game ID: ${gameId}`))
+
+      const payload = { checkerId }
+      console.log(
+        chalk.blue(`Request payload:`, JSON.stringify(payload, null, 2))
+      )
+
+      const response = await this.client.post(
+        `/api/${this.apiVersion}/games/${gameId}/move`,
+        payload
+      )
+
+      console.log(chalk.green(`Move successful!`))
+      return { success: true, data: response.data }
+    } catch (error) {
+      console.log(chalk.red(`Move failed with error:`, error))
       return this.handleError(error)
     }
   }
@@ -222,54 +249,6 @@ export class ApiService {
           speed,
         }
       )
-      return { success: true, data: response.data }
-    } catch (error) {
-      return this.handleError(error)
-    }
-  }
-
-  // Human vs Robot game creation
-  async createHumanVsRobotGame(
-    robotUserId?: string
-  ): Promise<ApiResponse<BackgammonGame>> {
-    try {
-      // Get current user ID
-      const humanUserId = this.config.userId
-      if (!humanUserId) {
-        return {
-          success: false,
-          error: 'No user ID found. Please authenticate first.',
-        }
-      }
-
-      // Get robot user ID
-      let robotId = robotUserId
-      if (!robotId) {
-        // If no specific robot ID provided, find the first available robot
-        const usersResponse = await this.getUsers()
-        if (!usersResponse.success) {
-          return {
-            success: false,
-            error: 'Failed to fetch users to find robot player',
-          }
-        }
-
-        const users = usersResponse.data || []
-        const robotUser = users.find((user: any) => user.userType === 'robot')
-        if (!robotUser) {
-          return {
-            success: false,
-            error: 'Robot player not found',
-          }
-        }
-        robotId = robotUser.id
-      }
-
-      // Create game with proper payload structure
-      const response = await this.client.post(`/api/${this.apiVersion}/games`, {
-        player1: { userId: humanUserId },
-        player2: { userId: robotId },
-      })
       return { success: true, data: response.data }
     } catch (error) {
       return this.handleError(error)

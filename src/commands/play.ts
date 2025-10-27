@@ -3,7 +3,6 @@ import { Command } from 'commander'
 import inquirer from 'inquirer'
 import { ApiService } from '../services/api'
 import { CliConfig } from '../types'
-import { BoardDisplay } from '../utils/board-display'
 
 export class PlayCommand extends Command {
   constructor() {
@@ -16,7 +15,7 @@ export class PlayCommand extends Command {
   private async execute(gameId: string): Promise<void> {
     try {
       const config: CliConfig = {
-        apiUrl: process.env.NODOTS_API_URL || 'http://localhost:3000',
+        apiUrl: process.env.NODOTS_API_URL || 'https://localhost:3443',
         userId: process.env.NODOTS_USER_ID,
         apiKey: process.env.NODOTS_API_KEY,
       }
@@ -41,9 +40,15 @@ export class PlayCommand extends Command {
           break
         }
 
-        // Display board
+        // Display board - ALWAYS use API's asciiBoard
         console.clear()
-        console.log(BoardDisplay.renderBoard(game))
+        const gameAny = game as any
+        if (gameAny.asciiBoard) {
+          console.log(chalk.cyanBright('📋 Board:'))
+          console.log(gameAny.asciiBoard)
+        } else {
+          console.log(chalk.redBright('⚠️  No ASCII board available from API'))
+        }
 
         // Check if game is over
         if ('status' in game && (game as any).status === 'completed') {

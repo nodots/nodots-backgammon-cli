@@ -2,7 +2,6 @@ import chalk from 'chalk'
 import { Command } from 'commander'
 import { ApiService } from '../services/api'
 import { CliConfig } from '../types'
-import { BoardDisplay } from '../utils/board-display'
 
 export class RollCommand extends Command {
   constructor() {
@@ -15,7 +14,7 @@ export class RollCommand extends Command {
   private async execute(gameId: string): Promise<void> {
     try {
       const config: CliConfig = {
-        apiUrl: process.env.NODOTS_API_URL || 'http://localhost:3000',
+        apiUrl: process.env.NODOTS_API_URL || 'https://localhost:3443',
         userId: process.env.NODOTS_USER_ID,
         apiKey: process.env.NODOTS_API_KEY,
       }
@@ -36,7 +35,15 @@ export class RollCommand extends Command {
       }
 
       console.log(chalk.green('Dice rolled successfully!'))
-      console.log(BoardDisplay.renderBoard(game))
+
+      // Display the board - ALWAYS use API's asciiBoard
+      const gameAny = game as any
+      if (gameAny.asciiBoard) {
+        console.log(chalk.cyanBright('📋 Board:'))
+        console.log(gameAny.asciiBoard)
+      } else {
+        console.log(chalk.redBright('⚠️  No ASCII board available from API'))
+      }
     } catch (error) {
       console.error(chalk.red('Error rolling dice:'), error)
     }

@@ -2,7 +2,7 @@
 
 ## 🎯 **Mission Overview**
 
-The nodots-backgammon CLI has successfully implemented human vs robot game functionality. However, **robot AI automation is not yet implemented** - robots do not make moves automatically. This document provides comprehensive information for implementing the robot AI automation in nodots-backgammon-core.
+The nodots-backgammon CLI has successfully implemented human vs robot game functionality. However, **robot AI automation is not yet implemented** - robots do not make moves automatically. This document provides comprehensive information for implementing the robot AI automation in core.
 
 ## ✅ **Current Status: What's Working**
 

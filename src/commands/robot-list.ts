@@ -14,7 +14,7 @@ export class RobotListCommand extends Command {
   private async execute(): Promise<void> {
     try {
       const config: CliConfig = {
-        apiUrl: process.env.NODOTS_API_URL || 'http://localhost:3000',
+        apiUrl: process.env.NODOTS_API_URL || 'https://localhost:3443',
         userId: process.env.NODOTS_USER_ID,
         apiKey: process.env.NODOTS_API_KEY,
       }
@@ -76,7 +76,7 @@ export class RobotListCommand extends Command {
       console.log()
       console.log(
         chalk.gray(
-          'Use "nodots-backgammon robot-simulate --interactive" to start a simulation'
+          'Use "ndbg robot-simulate --interactive" to start a simulation'
         )
       )
     } catch (error) {
