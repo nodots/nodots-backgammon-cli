@@ -1,13 +1,13 @@
 {
-  "name": "backgammon-cli",
-  "version": "3.2.1",
+  "name": "@nodots-llc/backgammon-cli",
+  "version": "4.1.1",
   "description": "Command-line backgammon client for Nodots Backgammon",
   "main": "dist/index.js",
   "bin": {
     "ndbg": "dist/index.js"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -b --force",
     "postbuild": "chmod +x dist/index.js",
     "start": "node dist/index.js",
     "dev": "ts-node src/index.ts",
@@ -17,20 +17,37 @@
     "lint:fix": "eslint src/**/*.ts --fix",
     "clean": "rm -rf dist",
     "prebuild": "npm run clean",
+    "link": "npm run build && npm link",
     "prepare": "npm run build",
     "release": "npm run build && npm publish",
-    "publish:dry-run": "npm run build && npm publish --dry-run"
+    "publish:dry-run": "npm run build && npm publish --dry-run",
+    "prepublishOnly": "npm run build && node ../../scripts/lint-versions.js"
   },
   "keywords": [
     "backgammon",
     "cli",
+    "client",
     "game",
-    "nodots"
+    "typescript"
   ],
   "author": "Ken Riley <kenr@nodots.com>",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nodots/nodots-backgammon.git",
+    "directory": "packages/cli"
+  },
+  "homepage": "https://github.com/nodots/nodots-backgammon/tree/main/packages/cli",
+  "bugs": {
+    "url": "https://github.com/nodots/nodots-backgammon/issues"
+  },
   "dependencies": {
-    "@nodots-llc/backgammon-types": "^3.2.1",
+    "@nodots-llc/backgammon-types": "file:../types",
+    "@nodots-llc/backgammon-ai": "file:../ai",
+    "@nodots-llc/backgammon-core": "file:../core",
     "axios": "^1.10.0",
     "chalk": "^4.1.2",
     "commander": "^11.1.0",

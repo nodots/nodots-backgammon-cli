@@ -35,7 +35,7 @@ export class ApiService {
     })
 
     // Add request interceptor for authentication
-    this.client.interceptors.request.use((config) => {
+    this.client.interceptors.request.use((config: any) => {
       if (this.config.apiKey) {
         config.headers.Authorization = `Bearer ${this.config.apiKey}`
       }
