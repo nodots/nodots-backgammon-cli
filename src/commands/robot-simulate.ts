@@ -2,6 +2,7 @@ import chalk from 'chalk'
 import { Command } from 'commander'
 import inquirer from 'inquirer'
 import { ApiService } from '../services/api'
+import { setLogLevel } from '@nodots-llc/backgammon-core'
 import { CliConfig } from '../types'
 
 export class RobotSimulateCommand extends Command {
@@ -22,11 +23,25 @@ export class RobotSimulateCommand extends Command {
         'Robot 2 difficulty (beginner|intermediate|advanced)'
       )
       .option('-i, --interactive', 'Interactive mode for configuration')
+      .option('-q, --quiet', 'Reduce logging output from core', false)
+      .option('--log-level <level>', 'Core log level (DEBUG, INFO, WARN, ERROR)')
       .action(this.execute.bind(this))
   }
 
   private async execute(options: any): Promise<void> {
     try {
+      // Configure core logger based on flags/env
+      const quiet = !!options.quiet || (process.env.NDBG_QUIET === '1' || process.env.NDBG_QUIET === 'true')
+      const cliLogLevel: string | undefined = options.logLevel
+      const envLogLevel: string | undefined = process.env.NDBG_LOG_LEVEL
+      const levels = ['DEBUG', 'INFO', 'WARN', 'ERROR'] as const
+      const normalize = (v?: string) => (v ? String(v).toUpperCase() : undefined)
+      const desiredLevel = normalize(cliLogLevel) || normalize(envLogLevel) || (quiet ? 'WARN' : undefined)
+      if (desiredLevel && levels.includes(desiredLevel as any)) {
+        try { setLogLevel(desiredLevel as any) } catch {}
+      } else if (desiredLevel) {
+        if (quiet) { try { setLogLevel('WARN' as any) } catch {} }
+      }
       const config: CliConfig = {
         apiUrl: process.env.NODOTS_API_URL || 'https://localhost:3443',
         userId: process.env.NODOTS_USER_ID,
