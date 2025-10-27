@@ -29,7 +29,7 @@ describe('Human vs Robot Game Integration Test', () => {
     // Mock ApiService
     mockApiService = {
       getUsers: jest.fn(),
-      createHumanVsRobotGame: jest.fn(),
+      createGame: jest.fn(),
       getGame: jest.fn(),
     } as any
 
@@ -107,14 +107,14 @@ describe('Human vs Robot Game Integration Test', () => {
       activeColor: 'white',
       players: [
         {
-          id: 'human-user-id-123',
+          userId: 'human-user-id-123',
           color: 'black',
           direction: 'clockwise',
           userType: 'human',
           email: 'kenr@nodots.com',
         },
         {
-          id: selectedRobot.id,
+          userId: selectedRobot.id,
           color: 'white',
           direction: 'counterclockwise',
           userType: 'robot',
@@ -216,7 +216,7 @@ describe('Human vs Robot Game Integration Test', () => {
       },
     }
 
-    mockApiService.createHumanVsRobotGame.mockResolvedValue({
+    mockApiService.createGame.mockResolvedValue({
       success: true,
       data: mockGame,
     })
@@ -267,7 +267,8 @@ describe('Human vs Robot Game Integration Test', () => {
         ]),
       },
     ])
-    expect(mockApiService.createHumanVsRobotGame).toHaveBeenCalledWith(
+    expect(mockApiService.createGame).toHaveBeenCalledWith(
+      'human-user-id-123',
       selectedRobot.id
     )
 
@@ -290,10 +291,10 @@ describe('Human vs Robot Game Integration Test', () => {
       expect.stringContaining('👥 Players:')
     )
     expect(consoleSpy).toHaveBeenCalledWith(
-      expect.stringContaining('👤 Human: BLACK')
+      expect.stringContaining('👤 Human: BLACK (')
     )
     expect(consoleSpy).toHaveBeenCalledWith(
-      expect.stringContaining('🤖 Robot: WHITE')
+      expect.stringContaining('🤖 Robot: WHITE (')
     )
 
     // Verify next steps
@@ -419,7 +420,7 @@ describe('Human vs Robot Game Integration Test', () => {
     })
 
     // Mock game creation failure
-    mockApiService.createHumanVsRobotGame.mockResolvedValue({
+    mockApiService.createGame.mockResolvedValue({
       success: false,
       error: 'API Error: Cannot create game',
     })

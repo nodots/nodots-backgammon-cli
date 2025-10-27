@@ -36,7 +36,7 @@ Enable the following grant types:
 
 - **Machine to Machine Applications** tab:
   - Authorize this application for your API
-  - API Identifier: `nodots-backgammon-api`
+  - API Identifier: `api`
   - Scopes: `read:games`, `write:games`, `read:users`, `write:users`
 
 ### 3. Update CLI Configuration
@@ -48,7 +48,7 @@ Update the client ID in the CLI code:
 const AUTH0_CONFIG = {
   domain: 'dev-8ykjldydiqcf2hqu.us.auth0.com',
   clientId: 'YOUR_ACTUAL_CLIENT_ID', // Replace with real Auth0 client ID
-  audience: 'nodots-backgammon-api',
+  audience: 'api',
 }
 ```
 
@@ -60,7 +60,7 @@ You can also configure via environment variables:
 # .env file or environment
 AUTH0_CLI_CLIENT_ID=your_auth0_client_id
 AUTH0_DOMAIN=dev-8ykjldydiqcf2hqu.us.auth0.com
-AUTH0_AUDIENCE=nodots-backgammon-api
+AUTH0_AUDIENCE=api
 ```
 
 ## How Device Flow Works

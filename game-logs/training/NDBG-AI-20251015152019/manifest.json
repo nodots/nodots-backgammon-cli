@@ -1,0 +1,10 @@
+{
+  "shards": [
+    {
+      "jsonl": "shard-00001.jsonl",
+      "csv": "shard-00001.csv",
+      "count": 99534
+    }
+  ],
+  "totalSamples": 99534
+}

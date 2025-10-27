@@ -1,0 +1,39 @@
+Welcome back, kenr@nodots.com!
+📊 Game Status: 020f614b-391d-425f-ac42-6642e72ff77c
+(node:9922) Warning: Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+🎮 Game: 020f614b-391d-425f-ac42-6642e72ff77c
+🎲 State: rolled
+🎯 Active Color: white
+🎲 Current Roll: [1, 1] (Total: 2)
+
+👥 Players:
+👤 Human: WHITE (clockwise) ← ACTIVE
+🤖 Robot: BLACK (counterclockwise)
+
+🎯 Available actions:
+• Interactive play: ndbg game-play 020f614b-391d-425f-ac42-6642e72ff77c
+• Make a move: ndbg move 020f614b-391d-425f-ac42-6642e72ff77c <from> <to>
+
+● Player 1   (167) vs ○ Player 2   (167)
+WHITE: [1 1]
+
++13-14-15-16-17-18-------19-20-21-22-23-24+
+| ○           ●    |   | ●              ○ |
+| ○           ●    |   | ●              ○ |
+| ○           ●    |   | ●                |
+| ○                |   | ●                |
+| ○                |   | ●                |
+|                  |BAR|                  |
+|                  |   |                  |
+| ●                |   | ○                |
+| ●                |   | ○                |
+| ●           ○    |   | ○                |
+| ●           ○    |   | ○              ● |
+| ●           ○    |   | ○              ● |
++12-11-10--9--8--7-------6--5--4--3--2--1-+
+
+State: ROLLED | Turn: WHITE
+● = Black, ○ = White | BAR = Hit | OFF = Borne off
+
