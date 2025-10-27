@@ -29,7 +29,7 @@ describe('Human vs Robot Game Integration Test', () => {
     // Mock ApiService
     mockApiService = {
       getUsers: jest.fn(),
-      createHumanVsRobotGame: jest.fn(),
+      createGame: jest.fn(),
       getGame: jest.fn(),
     } as any
 
@@ -216,7 +216,7 @@ describe('Human vs Robot Game Integration Test', () => {
       },
     }
 
-    mockApiService.createHumanVsRobotGame.mockResolvedValue({
+    mockApiService.createGame.mockResolvedValue({
       success: true,
       data: mockGame,
     })
@@ -267,7 +267,8 @@ describe('Human vs Robot Game Integration Test', () => {
         ]),
       },
     ])
-    expect(mockApiService.createHumanVsRobotGame).toHaveBeenCalledWith(
+    expect(mockApiService.createGame).toHaveBeenCalledWith(
+      'human-user-id-123',
       selectedRobot.id
     )
 
@@ -419,7 +420,7 @@ describe('Human vs Robot Game Integration Test', () => {
     })
 
     // Mock game creation failure
-    mockApiService.createHumanVsRobotGame.mockResolvedValue({
+    mockApiService.createGame.mockResolvedValue({
       success: false,
       error: 'API Error: Cannot create game',
     })
