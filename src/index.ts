@@ -27,6 +27,7 @@ import { RobotSimulateCommand } from './commands/robot-simulate'
 import { RobotSpeedCommand } from './commands/robot-speed'
 import { RobotStatusCommand } from './commands/robot-status'
 import { RobotStopCommand } from './commands/robot-stop'
+import { CollectCommand } from './commands/collect'
 
 // Human vs Robot game commands
 import { GamePlayCommand } from './commands/game-play'
@@ -44,6 +45,7 @@ async function checkAuthenticationAndPrompt(): Promise<void> {
   if (
     command === 'login' ||
     command === 'logout' ||
+    command === 'collect' ||
     command === '--help' ||
     command === '-h' ||
     command === '--version' ||
@@ -118,8 +120,10 @@ program.addCommand(new RobotStopCommand())
 program.addCommand(new RobotSpeedCommand())
 program.addCommand(new RobotBatchCommand())
 program.addCommand(new RobotBoardCommand())
+program.addCommand(new CollectCommand())
 
 // Global error handler
+// Prevent Commander from exiting the process; handle help/version gracefully
 program.exitOverride()
 
 async function main() {
@@ -129,7 +133,12 @@ async function main() {
 
     // Parse and execute commands
     program.parse()
-  } catch (err) {
+  } catch (err: any) {
+    // Commander throws when exitOverride is enabled. Treat help/version as success.
+    const code = err?.code as string | undefined
+    if (code === 'commander.helpDisplayed' || code === 'commander.version') {
+      process.exit(0)
+    }
     if (err instanceof Error) {
       console.error(chalk.red('Error:'), err.message)
     } else {

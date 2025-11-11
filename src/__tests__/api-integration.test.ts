@@ -27,7 +27,7 @@ describe('CLI API Integration', () => {
     it('should handle API endpoint configuration', () => {
       const apiEndpoints = [
         'https://localhost:3443/api/v3.7',
-        'https://api.nodots.com/v3.7', // Production
+        'https://api.nodots.com/api/v3.7', // Production
       ]
 
       for (const endpoint of apiEndpoints) {

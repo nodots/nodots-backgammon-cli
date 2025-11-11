@@ -261,7 +261,7 @@ export class LoginCommand extends Command {
         type: 'input',
         name: 'email',
         message: 'Enter your email address:',
-        validate: (input) => {
+        validate: (input: any) => {
           const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
           return emailRegex.test(input) || 'Please enter a valid email address'
         },

@@ -12,12 +12,19 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
+    "composite": true,
     "resolveJsonModule": true,
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
+    "emitDecoratorMetadata": true,
+    "types": ["node"]
   },
+  "references": [
+    { "path": "../types" },
+    { "path": "../core" },
+    { "path": "../ai" }
+  ],
   "include": [
     "src/**/*"
   ],
