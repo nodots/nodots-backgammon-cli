@@ -109,15 +109,7 @@ export class GameStatusCommand extends Command {
       ) {
         console.log(chalk.whiteBright(`• Roll dice: ndbg game-roll ${gameId}`))
       }
-      // When the game is in the 'moving' state, the player should make moves
-      if (game.stateKind === 'moving') {
-        console.log(
-          chalk.whiteBright(`• Interactive play: ndbg game-play ${gameId}`)
-        )
-        console.log(
-          chalk.whiteBright(`• Make a move: ndbg move ${gameId} <from> <to>`)
-        )
-      }
+
       if (game.stateKind === 'rolled-for-start') {
         console.log(chalk.whiteBright(`• Continue: ndbg game-roll ${gameId}`))
       }

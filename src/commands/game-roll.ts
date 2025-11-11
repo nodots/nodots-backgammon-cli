@@ -64,12 +64,7 @@ export class GameRollCommand extends Command {
       }
 
       console.log(chalk.yellowBright('\n🎯 Next steps:'))
-      // After a successful roll, the game typically enters the 'moving' state
-      if (result.stateKind === 'moving') {
-        console.log(
-          chalk.whiteBright(`• Interactive play: ndbg game-play ${gameId}`)
-        )
-      }
+
       console.log(
         chalk.whiteBright(`• Check status: ndbg game-status ${gameId}`)
       )
