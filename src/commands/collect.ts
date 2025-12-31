@@ -9,6 +9,7 @@ import {
   buildHintContextFromGame,
   getMoveHints,
 } from '@nodots-llc/backgammon-ai'
+import { MoveFilterSetting } from '@nodots-llc/gnubg-hints'
 import { Game, setLogLevel } from '@nodots-llc/backgammon-core'
 import type { BackgammonGame } from '@nodots-llc/backgammon-types'
 
@@ -55,7 +56,11 @@ export class CollectCommand extends Command {
     // This powers both simulation and labeling
     try {
       await initializeGnubgHints()
-      await configureGnubgHints({ evalPlies: 1, moveFilter: 1, usePruning: true })
+      await configureGnubgHints({
+        evalPlies: 1,
+        moveFilter: MoveFilterSetting.Narrow,
+        usePruning: true,
+      })
     } catch (e) {
       console.warn(chalk.yellow('[collect] Warning: Failed to initialize/configure GNU BG hints. Falling back may degrade labels.'), e)
     }
