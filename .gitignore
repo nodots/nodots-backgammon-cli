@@ -66,3 +66,4 @@ nodots-backgammon-types/dist/
 # AI specific
 nodots-backgammon-ai/lib/
 nodots-backgammon-ai/dist/ 
+.claude/
