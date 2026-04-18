@@ -8,10 +8,10 @@ import {
   configureGnubgHints,
   buildHintContextFromGame,
   getMoveHints,
-} from '@nodots-llc/backgammon-ai'
-import { MoveFilterSetting } from '@nodots-llc/gnubg-hints'
-import { Game, setLogLevel } from '@nodots-llc/backgammon-core'
-import type { BackgammonGame } from '@nodots-llc/backgammon-types'
+} from '@nodots/backgammon-ai'
+import { MoveFilterSetting } from '@nodots/gnubg-hints'
+import { Game, setLogLevel } from '@nodots/backgammon-core'
+import type { BackgammonGame } from '@nodots/backgammon-types'
 
 export class CollectCommand extends Command {
   constructor() {
@@ -146,7 +146,7 @@ export class CollectCommand extends Command {
                 const dv = m.dieValue
                 const pm = (Game as any).Board?.getPossibleMoves
                   ? (Game as any).Board.getPossibleMoves(moving.board, activePlay.player, dv)
-                  : (require('@nodots-llc/backgammon-core').Board.getPossibleMoves(moving.board, activePlay.player, dv))
+                  : (require('@nodots/backgammon-core').Board.getPossibleMoves(moving.board, activePlay.player, dv))
                 const arr = Array.isArray(pm) ? pm : pm.moves
                 for (const mv of arr) {
                   const fromKind = (mv.origin?.kind) || mv.origin?.checkercontainerKind || 'point'
@@ -172,7 +172,7 @@ export class CollectCommand extends Command {
             // Fallback: pick any legal move for first ready die
             if (!chosenDie || !selectedOrigin) {
               const m: any = readyMoves[0]
-              const pm = require('@nodots-llc/backgammon-core').Board.getPossibleMoves(moving.board, activePlay.player, (m as any).dieValue)
+              const pm = require('@nodots/backgammon-core').Board.getPossibleMoves(moving.board, activePlay.player, (m as any).dieValue)
               const arr = Array.isArray(pm) ? pm : pm.moves
               if (arr.length > 0) {
                 chosenDie = (m as any).dieValue

@@ -1,4 +1,4 @@
-declare module '@nodots-llc/backgammon-ai' {
+declare module '@nodots/backgammon-ai' {
   // Minimal ambient types to allow CLI build without requiring AI build first
   export class DatasetWriter {
     constructor(opts: { outDir: string; shardSize?: number; writeCSV?: boolean; dedupByFeatureHash?: boolean })
