@@ -1,4 +1,4 @@
-import { BackgammonBoard, BackgammonGame } from '@nodots-llc/backgammon-types'
+import { BackgammonBoard, BackgammonGame } from '@nodots/backgammon-types'
 import chalk from 'chalk'
 
 export class BoardDisplay {

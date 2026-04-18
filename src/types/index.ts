@@ -2,7 +2,7 @@ import {
   BackgammonBoard,
   BackgammonGame,
   BackgammonPlayer,
-} from '@nodots-llc/backgammon-types'
+} from '@nodots/backgammon-types'
 
 export interface CliConfig {
   apiUrl: string

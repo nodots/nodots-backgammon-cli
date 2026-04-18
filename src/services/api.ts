@@ -1,4 +1,4 @@
-import { BackgammonGame, BackgammonPlayer } from '@nodots-llc/backgammon-types'
+import { BackgammonGame, BackgammonPlayer } from '@nodots/backgammon-types'
 import axios, { AxiosInstance } from 'axios'
 import chalk from 'chalk'
 import { ApiResponse, CliConfig } from '../types'
