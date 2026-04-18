@@ -1,4 +1,4 @@
-import { BackgammonGame } from '@nodots-llc/backgammon-types'
+import { BackgammonGame } from '@nodots/backgammon-types'
 import chalk from 'chalk'
 
 interface PointData {

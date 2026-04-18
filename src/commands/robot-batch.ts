@@ -2,7 +2,7 @@ import chalk from 'chalk'
 import { Command } from 'commander'
 import inquirer from 'inquirer'
 import { ApiService } from '../services/api'
-import { setLogLevel } from '@nodots-llc/backgammon-core'
+import { setLogLevel } from '@nodots/backgammon-core'
 import { CliConfig } from '../types'
 
 interface BatchScenario {
