@@ -1,6 +1,6 @@
 {
   "name": "@nodots/backgammon-cli",
-  "version": "1.0.0-rc.1",
+  "version": "1.0.0-rc.2",
   "description": "Command-line backgammon client for Nodots Backgammon",
   "main": "dist/index.js",
   "bin": {
