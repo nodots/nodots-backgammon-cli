@@ -1,13 +1,11 @@
-# @nodots-llc/backgammon-cli
+# @nodots/backgammon-cli
 
 Command-line interface for [Nodots Backgammon](https://backgammon.nodots.com). Play games, drive robot simulations, and inspect board state from your terminal.
-
-> **Note:** This package is being migrated to `@nodots/backgammon-cli` as part of the 1.0 launch. Install the legacy package name for now; migration guidance will ship with the 1.0 release.
 
 ## Install
 
 ```sh
-npm install -g @nodots-llc/backgammon-cli
+npm install -g @nodots/backgammon-cli
 ```
 
 The binary is `ndbg`:
