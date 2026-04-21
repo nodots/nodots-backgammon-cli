@@ -2,7 +2,10 @@ import chalk from 'chalk'
 import { Command } from 'commander'
 import inquirer from 'inquirer'
 import { ApiService } from '../services/api'
+import { AuthService } from '../services/auth'
 import { CliConfig } from '../types'
+
+const POLL_MS = 2000
 
 export class GamePlayCommand extends Command {
   constructor() {
@@ -13,178 +16,224 @@ export class GamePlayCommand extends Command {
   }
 
   private async execute(gameId: string): Promise<void> {
-    try {
-      const config: CliConfig = {
-        apiUrl: process.env.NODOTS_API_URL || 'https://localhost:3443',
-        userId: process.env.NODOTS_USER_ID,
-        apiKey: process.env.NODOTS_API_KEY,
-      }
-
-      const apiService = new ApiService(config)
-
-      console.log(chalk.blue('Starting interactive game session...'))
-      console.log(chalk.cyan(`Game ID: ${gameId}`))
-
-      // Main game loop
-      while (true) {
-        // Get current game state
-        const gameResponse = await apiService.getGame(gameId)
-        if (!gameResponse.success) {
-          console.error(chalk.red('Failed to fetch game:', gameResponse.error))
-          break
-        }
-
-        const game = gameResponse.data
-        if (!game) {
-          console.error(chalk.red('Game not found'))
-          break
-        }
-
-        // Display board - ALWAYS use API's asciiBoard
-        console.clear()
-        const gameAny = game as any
-        if (gameAny.asciiBoard) {
-          console.log(chalk.cyanBright('📋 Board:'))
-          console.log(gameAny.asciiBoard)
-        } else {
-          console.log(chalk.redBright('⚠️  No ASCII board available from API'))
-        }
-
-        // Check if game is over
-        if ('status' in game && (game as any).status === 'completed') {
-          console.log(chalk.green('Game completed!'))
-          break
-        }
-
-        // Check if it's the current player's turn
-        const currentPlayerId =
-          'currentPlayer' in game ? (game as any).currentPlayer?.id : null
-        if (currentPlayerId !== config.userId) {
-          console.log(chalk.yellow('Waiting for opponent...'))
-          await new Promise((resolve) => setTimeout(resolve, 2000))
-          continue
-        }
-
-        // Show available actions
-        const action = await inquirer.prompt([
-          {
-            type: 'list',
-            name: 'action',
-            message: 'What would you like to do?',
-            choices: [
-              { name: 'Roll dice', value: 'roll' },
-              { name: 'Make a move', value: 'move' },
-              { name: 'View possible moves', value: 'moves' },
-              { name: 'Quit', value: 'quit' },
-            ],
-          },
-        ])
-
-        switch (action.action) {
-          case 'roll':
-            await this.handleRoll(apiService, gameId)
-            break
-          case 'move':
-            await this.handleMove(apiService, gameId)
-            break
-          case 'moves':
-            // This would need to be implemented based on the API
-            console.log(
-              chalk.yellow('Possible moves feature not yet implemented')
-            )
-            break
-          case 'quit':
-            console.log(chalk.blue('Goodbye!'))
-            return
-        }
-      }
-    } catch (error) {
-      console.error(chalk.red('Error in game session:'), error)
+    const auth = new AuthService()
+    const authUser = auth.getCurrentUser()
+    if (!authUser?.userId) {
+      console.log(chalk.red('Not authenticated. Run: ndbg login'))
+      return
     }
-  }
 
-  private async handleRoll(
-    apiService: ApiService,
-    gameId: string
-  ): Promise<void> {
-    try {
-      const gameResponse = await apiService.rollDice(gameId)
-      if (!gameResponse.success) {
-        console.error(chalk.red('Failed to roll dice:', gameResponse.error))
+    const config: CliConfig = {
+      apiUrl: process.env.NODOTS_API_URL || 'https://localhost:3443',
+      userId: authUser.userId,
+      apiKey: authUser.token,
+    }
+    const api = new ApiService(config)
+
+    console.log(chalk.blue(`Game ID: ${gameId}`))
+    console.log(chalk.gray(`You are ${authUser.email || authUser.userId}`))
+
+    while (true) {
+      const resp = await api.getGame(gameId)
+      if (!resp.success || !resp.data) {
+        console.error(chalk.red('Failed to fetch game:', resp.error))
+        return
+      }
+      const game = resp.data as any
+
+      this.renderBoard(game)
+
+      if (game.stateKind === 'completed') {
+        const winnerColor = game.winner?.color ?? game.activeColor
+        console.log(chalk.green(`Game completed. Winner: ${winnerColor}`))
         return
       }
 
-      console.log(chalk.green('Dice rolled successfully!'))
-
-      // Display the updated board after rolling
-      const updatedGameResponse = await apiService.getGame(gameId)
-      if (updatedGameResponse.success && updatedGameResponse.data) {
-        const updatedGameAny = updatedGameResponse.data as any
-        if (updatedGameAny.asciiBoard) {
-          console.log(chalk.cyanBright('📋 Board:'))
-          console.log(updatedGameAny.asciiBoard)
-        } else {
-          console.log(chalk.redBright('⚠️  No ASCII board available from API'))
-        }
-      }
-    } catch (error) {
-      console.error(chalk.red('Error rolling dice:'), error)
-    }
-  }
-
-  private async handleMove(
-    apiService: ApiService,
-    gameId: string
-  ): Promise<void> {
-    try {
-      const answers = await inquirer.prompt([
-        {
-          type: 'input',
-          name: 'from',
-          message: 'From position:',
-          validate: (input: string) => {
-            const num = parseInt(input, 10)
-            return !isNaN(num) && num >= 1 && num <= 24
-              ? true
-              : 'Please enter a valid position (1-24)'
-          },
-        },
-        {
-          type: 'input',
-          name: 'to',
-          message: 'To position:',
-          validate: (input: string) => {
-            const num = parseInt(input, 10)
-            return !isNaN(num) && num >= 0 && num <= 25
-              ? true
-              : 'Please enter a valid position (0-25)'
-          },
-        },
-      ])
-
-      const fromPos = parseInt(answers.from, 10)
-      const toPos = parseInt(answers.to, 10)
-
-      const gameResponse = await apiService.makeMove(gameId, fromPos, toPos)
-      if (!gameResponse.success) {
-        console.error(chalk.red('Failed to make move:', gameResponse.error))
+      const me = this.findMyPlayer(game, authUser.userId)
+      if (!me) {
+        console.error(chalk.red('You are not a player in this game.'))
         return
       }
+      const isMyTurn = game.activeColor === me.color
 
-      console.log(chalk.green('Move made successfully!'))
+      if (!isMyTurn) {
+        console.log(
+          chalk.yellow(
+            `Waiting on ${game.activeColor} (state: ${game.stateKind})…`
+          )
+        )
+        await sleep(POLL_MS)
+        continue
+      }
 
-      // Display the updated board after moving
-      if (gameResponse.data) {
-        const movedGameAny = gameResponse.data as any
-        if (movedGameAny.asciiBoard) {
-          console.log(chalk.cyanBright('📋 Board:'))
-          console.log(movedGameAny.asciiBoard)
-        } else {
-          console.log(chalk.redBright('⚠️  No ASCII board available from API'))
+      // It is our turn. Dispatch on stateKind.
+      switch (game.stateKind) {
+        case 'rolling-for-start': {
+          const { go } = await inquirer.prompt([
+            {
+              type: 'confirm',
+              name: 'go',
+              message: 'Roll for start?',
+              default: true,
+            },
+          ])
+          if (!go) return
+          const r = await api.rollForStart(gameId)
+          if (!r.success) console.error(chalk.red(r.error))
+          break
+        }
+        case 'rolled-for-start':
+        case 'rolling': {
+          const { go } = await inquirer.prompt([
+            {
+              type: 'confirm',
+              name: 'go',
+              message: 'Roll dice?',
+              default: true,
+            },
+          ])
+          if (!go) return
+          const r = await api.rollDice(gameId)
+          if (!r.success) console.error(chalk.red(r.error))
+          break
+        }
+        case 'rolled':
+        case 'preparing-move': {
+          // Transient states; server should advance to 'moving' shortly.
+          await sleep(POLL_MS)
+          break
+        }
+        case 'moving': {
+          const cont = await this.playMove(api, gameId, game, me)
+          if (!cont) return
+          break
+        }
+        case 'moved': {
+          // Waiting for server to transition to next player's rolling state.
+          await sleep(POLL_MS)
+          break
+        }
+        default: {
+          console.log(
+            chalk.gray(`Unhandled state: ${game.stateKind}, polling…`)
+          )
+          await sleep(POLL_MS)
         }
       }
-    } catch (error) {
-      console.error(chalk.red('Error making move:'), error)
     }
   }
+
+  private renderBoard(game: any): void {
+    console.clear()
+    if (game.asciiBoard) {
+      console.log(chalk.cyanBright('Board:'))
+      console.log(game.asciiBoard)
+    } else {
+      console.log(chalk.red('No asciiBoard from API'))
+    }
+    console.log(
+      chalk.gray(
+        `state=${game.stateKind} activeColor=${game.activeColor} cube=${
+          game.cube?.value ?? 1
+        }`
+      )
+    )
+  }
+
+  private findMyPlayer(game: any, userId: string): any | null {
+    const players = Array.isArray(game.players)
+      ? game.players
+      : Array.from(game.players ?? [])
+    return players.find((p: any) => p.userId === userId) ?? null
+  }
+
+  // Returns false to exit the loop.
+  private async playMove(
+    api: ApiService,
+    gameId: string,
+    game: any,
+    me: any
+  ): Promise<boolean> {
+    const movesSrc = game.activePlay?.moves
+    const moves: any[] = Array.isArray(movesSrc)
+      ? movesSrc
+      : movesSrc
+        ? Array.from(movesSrc)
+        : []
+    const readyMoves = moves.filter((m) => m.stateKind === 'ready')
+
+    if (readyMoves.length === 0) {
+      console.log(chalk.gray('No ready moves; waiting…'))
+      await sleep(POLL_MS)
+      return true
+    }
+
+    // Build a unique list of (checkerId, dieValue, label) choices from the
+    // possibleMoves on each ready die.
+    type Choice = {
+      label: string
+      checkerId: string
+      dieValue: number
+    }
+    const choiceMap = new Map<string, Choice>()
+    for (const move of readyMoves) {
+      for (const pm of move.possibleMoves ?? []) {
+        const origin = pm.origin
+        const dest = pm.destination
+        const fromLabel = this.containerLabel(origin, me.direction)
+        const toLabel = this.containerLabel(dest, me.direction)
+        // Pick the first checker of our color on the origin.
+        const checker = (origin?.checkers ?? []).find(
+          (c: any) => c.color === me.color
+        )
+        if (!checker) continue
+        const key = `${checker.id}|${move.dieValue}|${toLabel}`
+        if (!choiceMap.has(key)) {
+          choiceMap.set(key, {
+            label: `die ${move.dieValue}: ${fromLabel} → ${toLabel}`,
+            checkerId: checker.id,
+            dieValue: move.dieValue,
+          })
+        }
+      }
+    }
+
+    const choices = Array.from(choiceMap.values())
+    if (choices.length === 0) {
+      console.log(
+        chalk.yellow('No legal moves available; forfeiting remaining dice.')
+      )
+      await sleep(POLL_MS)
+      return true
+    }
+
+    const { picked } = await inquirer.prompt([
+      {
+        type: 'list',
+        name: 'picked',
+        message: 'Pick a move:',
+        choices: [
+          ...choices.map((c) => ({ name: c.label, value: c.checkerId })),
+          { name: 'Quit', value: '__quit__' },
+        ],
+      },
+    ])
+    if (picked === '__quit__') return false
+
+    const r = await api.makeMoveWithCheckerId(gameId, picked)
+    if (!r.success) console.error(chalk.red(r.error))
+    return true
+  }
+
+  private containerLabel(container: any, direction: string): string {
+    if (!container) return '?'
+    if (container.kind === 'bar') return 'bar'
+    if (container.kind === 'off') return 'off'
+    const pos = container.position?.[direction]
+    return pos != null ? String(pos) : '?'
+  }
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((r) => setTimeout(r, ms))
 }

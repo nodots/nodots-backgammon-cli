@@ -34,6 +34,7 @@ import { GamePlayCommand } from './commands/game-play'
 import { GameRollCommand } from './commands/game-roll'
 import { GameStatusCommand } from './commands/game-status'
 import { HumanVsRobotCommand } from './commands/human-vs-robot'
+import { RobotVsRobotCommand } from './commands/robot-vs-robot'
 
 async function checkAuthenticationAndPrompt(): Promise<void> {
   const authService = new AuthService()
@@ -107,6 +108,7 @@ program.addCommand(new MoveCommand())
 
 // Add human vs robot game commands
 program.addCommand(new HumanVsRobotCommand())
+program.addCommand(new RobotVsRobotCommand())
 program.addCommand(new GameStatusCommand())
 program.addCommand(new GameRollCommand())
 program.addCommand(new GamePlayCommand())

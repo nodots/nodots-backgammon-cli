@@ -43,6 +43,16 @@ export class ApiService {
     })
   }
 
+  // The API wraps some responses as { success, data } while returning the
+  // game object directly from others (GET). Unwrap so callers always see
+  // the inner payload.
+  private unwrap<T>(body: any): T {
+    if (body && typeof body === 'object' && 'success' in body && 'data' in body) {
+      return body.data as T
+    }
+    return body as T
+  }
+
   private getSSLConfig() {
     // Handle HTTPS with self-signed certificates in development
     if (this.config.apiUrl.startsWith('https://')) {
@@ -66,14 +76,15 @@ export class ApiService {
 
   async createGame(
     player1Id: string,
-    player2Id: string
+    player2Id: string,
+    opts?: { player1IsRobot?: boolean; player2IsRobot?: boolean }
   ): Promise<ApiResponse<BackgammonGame>> {
     try {
       const response = await this.client.post(`/api/${this.apiVersion}/games`, {
-        player1: { userId: player1Id },
-        player2: { userId: player2Id },
+        player1: { userId: player1Id, isRobot: !!opts?.player1IsRobot },
+        player2: { userId: player2Id, isRobot: !!opts?.player2IsRobot },
       })
-      return { success: true, data: response.data }
+      return { success: true, data: this.unwrap<BackgammonGame>(response.data) }
     } catch (error) {
       return this.handleError(error)
     }
@@ -84,7 +95,18 @@ export class ApiService {
       const response = await this.client.get(
         `/api/${this.apiVersion}/games/${gameId}`
       )
-      return { success: true, data: response.data }
+      return { success: true, data: this.unwrap<BackgammonGame>(response.data) }
+    } catch (error) {
+      return this.handleError(error)
+    }
+  }
+
+  async rollForStart(gameId: string): Promise<ApiResponse<BackgammonGame>> {
+    try {
+      const response = await this.client.post(
+        `/api/${this.apiVersion}/games/${gameId}/roll-for-start`
+      )
+      return { success: true, data: this.unwrap<BackgammonGame>(response.data) }
     } catch (error) {
       return this.handleError(error)
     }
@@ -95,7 +117,7 @@ export class ApiService {
       const response = await this.client.post(
         `/api/${this.apiVersion}/games/${gameId}/roll`
       )
-      return { success: true, data: response.data }
+      return { success: true, data: this.unwrap<BackgammonGame>(response.data) }
     } catch (error) {
       return this.handleError(error)
     }
@@ -114,7 +136,7 @@ export class ApiService {
           to,
         }
       )
-      return { success: true, data: response.data }
+      return { success: true, data: this.unwrap<BackgammonGame>(response.data) }
     } catch (error) {
       return this.handleError(error)
     }
@@ -139,7 +161,7 @@ export class ApiService {
       )
 
       console.log(chalk.green(`Move successful!`))
-      return { success: true, data: response.data }
+      return { success: true, data: this.unwrap<BackgammonGame>(response.data) }
     } catch (error) {
       console.log(chalk.red(`Move failed with error:`, error))
       return this.handleError(error)
