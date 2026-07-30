@@ -34,10 +34,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'npm'
 
+      # `npm install`, not `npm ci`, and no npm cache: this repo ignores
+      # package-lock.json (.gitignore line 44), so there is no lock to install
+      # from or to key a cache on. The consequence is worth being explicit
+      # about -- each run resolves the declared ranges fresh, so CI tests
+      # against the newest @nodots releases satisfying ^1.0.0 rather than
+      # against pinned versions. That is not reproducible, but it does mean a
+      # types or core release that breaks this package shows up here.
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Build
         run: npm run build
