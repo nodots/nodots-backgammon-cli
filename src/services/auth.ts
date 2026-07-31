@@ -9,6 +9,8 @@ export interface UserProfile {
   userId?: string
   token?: string
   loginTime?: string
+  /** How the token was obtained: 'api-key', 'api-token', 'auth0-device'. */
+  authMethod?: string
 }
 
 export class AuthService {
