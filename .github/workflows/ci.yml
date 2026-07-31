@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: [main, development]
+  pull_request:
+    branches: [main, development]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      # Without this, the first version to fail cancels the other, and the
+      # cancelled job reports as a failure even when its tests all passed.
+      fail-fast: false
+      matrix:
+        node-version: [20, 22]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # @nodots/backgammon-ai and @nodots/backgammon-core pull
+      # @nodots/gnubg-hints, whose native addon links against GLib during its
+      # install script. Without these, npm ci fails before anything is built.
+      - name: Install GLib dev headers (for the gnubg-hints native addon)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libglib2.0-dev pkg-config
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      # `npm install`, not `npm ci`, and no npm cache: this repo ignores
+      # package-lock.json (.gitignore line 44), so there is no lock to install
+      # from or to key a cache on. The consequence is worth being explicit
+      # about -- each run resolves the declared ranges fresh, so CI tests
+      # against the newest @nodots releases satisfying ^1.0.0 rather than
+      # against pinned versions. That is not reproducible, but it does mean a
+      # types or core release that breaks this package shows up here.
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run build
+
+      - name: Run tests
+        run: npm test
+
+      # `npm run lint` is deliberately absent. Its eslint config was broken
+      # outright until this branch fixed the `extends` entry, and with it
+      # working the existing code reports 19 errors and 171 warnings. Wiring it
+      # in now would mean a red pipeline or a sweeping style change; neither
+      # belongs in the commit that first gives this repo any CI at all.
