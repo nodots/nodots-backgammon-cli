@@ -168,6 +168,30 @@ export class ApiService {
     }
   }
 
+  /**
+   * Who the current credential authenticates as.
+   *
+   * Used by `login --api-key` to check a key before saving it and to learn the
+   * `userId`, which an API key does not itself carry. Returns identity only.
+   */
+  async whoami(): Promise<
+    ApiResponse<{
+      id: string
+      email: string
+      nickname?: string
+      userType?: string
+    }>
+  > {
+    try {
+      const response = await this.client.get(
+        `/api/${this.apiVersion}/keys/whoami`
+      )
+      return { success: true, data: this.unwrap(response.data) }
+    } catch (error) {
+      return this.handleError(error)
+    }
+  }
+
   async getUsers(): Promise<ApiResponse<BackgammonPlayer[]>> {
     try {
       const response = await this.client.get(`/api/${this.apiVersion}/users`)
