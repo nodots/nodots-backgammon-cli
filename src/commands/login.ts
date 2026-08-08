@@ -18,10 +18,16 @@ export class LoginCommand extends Command {
     super('login')
     this.description('Login to Nodots Backgammon')
     this.option('-t, --token <token>', 'API token (for service authentication)')
+    this.option(
+      '-k, --api-key <key>',
+      'API key issued by POST /keys (starts with nbg_)'
+    )
     this.action(this.execute.bind(this))
   }
 
-  public async execute(options: { token?: string } = {}): Promise<void> {
+  public async execute(
+    options: { token?: string; apiKey?: string } = {}
+  ): Promise<void> {
     try {
       const authService = new AuthService()
 
@@ -54,6 +60,12 @@ export class LoginCommand extends Command {
           return
         }
         // For 'relogin', continue with new login process
+      }
+
+      // API key login. Preferred over --token: the legacy `cli|<id>` token is
+      // no longer accepted in production.
+      if (options.apiKey) {
+        return await this.handleApiKeyLogin(options.apiKey, authService)
       }
 
       // If token is provided via command line (for CI/service usage)
@@ -221,6 +233,52 @@ export class LoginCommand extends Command {
         }`
       )
     }
+  }
+
+  /**
+   * Log in with an API key.
+   *
+   * The key is sent as `Authorization: Bearer <key>` exactly like any other
+   * token, so no transport change is needed. What this adds over `--token` is
+   * verification and identity: it calls `GET /keys/whoami` before saving, so a
+   * bad key fails here rather than on the first real command, and the resolved
+   * `userId` is stored because commands need it and a key does not carry it.
+   */
+  private async handleApiKeyLogin(
+    key: string,
+    authService: AuthService
+  ): Promise<void> {
+    if (!key.startsWith('nbg_')) {
+      console.log(
+        chalk.yellow('⚠️  API keys start with "nbg_". Continuing anyway.')
+      )
+    }
+
+    const apiService = new ApiService({ apiKey: key })
+    const identity = await apiService.whoami()
+
+    if (!identity.success || !identity.data) {
+      console.log(chalk.red('❌ That key was not accepted by the API.'))
+      console.log(
+        chalk.gray(
+          'A key can be rejected because it is unknown, revoked or expired — the API deliberately does not say which.'
+        )
+      )
+      logger.error('API key login failed', identity.error)
+      return
+    }
+
+    const authData = {
+      token: key,
+      userId: identity.data.id,
+      email: identity.data.email,
+      authMethod: 'api-key',
+      loginTime: new Date().toISOString(),
+    }
+    authService.login(authData)
+
+    console.log(chalk.green('✅ API key accepted'))
+    console.log(chalk.gray(`Logged in as: ${identity.data.email}`))
   }
 
   private async handleTokenLogin(
