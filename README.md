@@ -23,7 +23,33 @@ ndbg login
 ndbg logout
 ```
 
-## Play a game
+## Interactive shell
+
+Run `ndbg` with no arguments to drop into a gnubg-style REPL:
+
+```sh
+ndbg
+```
+
+```text
+ndbg> help
+ndbg> new <opponent-user-id> [--robot]
+ndbg [3f9a…]> roll
+ndbg [3f9a…]> move 8/5 6/5
+ndbg [3f9a…]> hint
+ndbg [3f9a…]> show board
+ndbg [3f9a…]> save my-game
+ndbg [3f9a…]> quit
+```
+
+Notes:
+
+- Tab completes commands, `show` subtargets, and saved-game names.
+- Command history persists in `~/.ndbg_history` (use the up arrow to recall).
+- Saved-game name -> game-id mappings are stored in `~/.ndbg/games.json`. Use `load <name>` from any future session to reattach.
+- Move notation matches gnubg: `8/5`, `bar/20`, `6/off`, chained `13/8/5`.
+
+## Play a game (one-shot commands)
 
 Start a human-vs-robot game, then roll and move:
 

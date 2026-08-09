@@ -142,6 +142,17 @@ export class ApiService {
     }
   }
 
+  async confirmTurn(gameId: string): Promise<ApiResponse<BackgammonGame>> {
+    try {
+      const response = await this.client.post(
+        `/api/${this.apiVersion}/games/${gameId}/confirm-turn`
+      )
+      return { success: true, data: this.unwrap<BackgammonGame>(response.data) }
+    } catch (error) {
+      return this.handleError(error)
+    }
+  }
+
   async makeMoveWithCheckerId(
     gameId: string,
     checkerId: string

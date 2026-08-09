@@ -36,6 +36,9 @@ import { GameStatusCommand } from './commands/game-status'
 import { HumanVsRobotCommand } from './commands/human-vs-robot'
 import { RobotVsRobotCommand } from './commands/robot-vs-robot'
 
+// Interactive shell
+import { runShell } from './shell'
+
 async function checkAuthenticationAndPrompt(): Promise<void> {
   const authService = new AuthService()
 
@@ -132,6 +135,12 @@ async function main() {
   try {
     // Check authentication before processing commands
     await checkAuthenticationAndPrompt()
+
+    // No subcommand given: drop into the interactive shell
+    if (process.argv.length === 2) {
+      await runShell()
+      return
+    }
 
     // Parse and execute commands
     program.parse()
